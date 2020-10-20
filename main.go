@@ -1,17 +1,14 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"github.com/madeindra/meet-app/model"
+	"github.com/madeindra/meet-app/route"
 )
 
 func main() {
-	router := gin.Default()
+	model.Init()
+	defer model.Close()
 
-	router.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"success": true, "message": "Server is working properly"})
-	})
-
-	router.Run(":8080")
+	server := route.Init()
+	server.Run(":8080")
 }
