@@ -3,5 +3,5 @@ package models
 import "github.com/madeindra/meet-app/db"
 
 func Migrate() {
-	db.DB.AutoMigrate(&User{})
+	db.DB.AutoMigrate(&Users{})
 }

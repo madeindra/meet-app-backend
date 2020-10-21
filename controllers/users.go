@@ -8,7 +8,7 @@ import (
 )
 
 func UserCreate(ctx *gin.Context) {
-	var data models.User
+	var data models.Users
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := gin.H{"success": false, "message": "Bad Request"}
 		ctx.JSON(http.StatusBadRequest, res)
