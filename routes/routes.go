@@ -9,7 +9,7 @@ const (
 	rootPath string = "/"
 	v1Path   string = "/api/v1"
 
-	userPath string = "/users"
+	registerPath string = "/registration"
 )
 
 func Init() *gin.Engine {
@@ -18,7 +18,7 @@ func Init() *gin.Engine {
 
 	v1 := router.Group(v1Path)
 	{
-		v1.POST(userPath, controllers.UserCreate)
+		v1.POST(registerPath, controllers.CreateCredential)
 	}
 
 	return router

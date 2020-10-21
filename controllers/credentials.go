@@ -7,15 +7,15 @@ import (
 	"github.com/madeindra/meet-app/models"
 )
 
-func UserCreate(ctx *gin.Context) {
-	var data models.Users
+func CreateCredential(ctx *gin.Context) {
+	var data models.Credentials
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := gin.H{"success": false, "message": "Bad Request"}
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	newUser, err := models.CreateUser(data)
+	credential, err := models.CreateCredential(data)
 
 	if err != nil {
 		res := gin.H{"success": false, "message": "Internal Server Error"}
@@ -23,7 +23,7 @@ func UserCreate(ctx *gin.Context) {
 		return
 	}
 
-	res := gin.H{"success": true, "data": newUser}
+	res := gin.H{"success": true, "data": credential}
 	ctx.JSON(http.StatusOK, res)
 	return
 }
