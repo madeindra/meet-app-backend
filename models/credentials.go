@@ -4,8 +4,8 @@ import "github.com/jinzhu/gorm"
 
 type Credentials struct {
 	ID       uint   `json:"id" gorm:"primaryKey"`
-	Email    string `json:"email" gorm:"unique"`
-	Password string `json:"password"`
+	Email    string `json:"email" gorm:"unique" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type CredentialInterface interface {

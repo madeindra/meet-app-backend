@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/madeindra/meet-app/controllers"
 	"github.com/madeindra/meet-app/db"
 	"github.com/madeindra/meet-app/models"
@@ -16,6 +17,8 @@ const (
 
 func Init() *gin.Engine {
 	router := gin.Default()
+
+	binding.Validator = new(defaultValidator)
 
 	pingController := controllers.NewPingController()
 	credentialController := controllers.NewCredentialController(models.NewCredentialImplementation(db.DB))
