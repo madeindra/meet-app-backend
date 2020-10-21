@@ -1,8 +1,8 @@
-package model
+package db
 
 import (
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 var DB *gorm.DB
@@ -13,8 +13,6 @@ func Init() {
 	if err != nil {
 		panic("Failed while connecting to database")
 	}
-
-	conn.AutoMigrate(&User{})
 
 	DB = conn
 }
