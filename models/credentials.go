@@ -1,6 +1,6 @@
 package models
 
-import "github.com/madeindra/meet-app/db"
+import "github.com/jinzhu/gorm"
 
 type Credentials struct {
 	ID       uint   `json:"id" gorm:"primaryKey"`
@@ -8,8 +8,20 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-func CreateCredential(data Credentials) (Credentials, error) {
-	tx := db.DB.Begin()
+type CredentialInterface interface {
+	CreateNewCredential(data Credentials) (Credentials, error)
+}
+
+type CredentialImplementation struct {
+	db *gorm.DB
+}
+
+func NewCredentialImplementation(db *gorm.DB) *CredentialImplementation {
+	return &CredentialImplementation{db}
+}
+
+func (implementation *CredentialImplementation) CreateNewCredential(data Credentials) (Credentials, error) {
+	tx := implementation.db.Begin()
 
 	if err := tx.Create(&data).Error; err != nil {
 		tx.Rollback()

@@ -7,7 +7,15 @@ import (
 	"github.com/madeindra/meet-app/models"
 )
 
-func CreateCredential(ctx *gin.Context) {
+type CredentialController struct {
+	credential models.CredentialInterface
+}
+
+func NewCredentialController(credential models.CredentialInterface) *CredentialController {
+	return &CredentialController{credential}
+}
+
+func (controller *CredentialController) Create(ctx *gin.Context) {
 	var data models.Credentials
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := gin.H{"success": false, "message": "Bad Request"}
@@ -15,7 +23,7 @@ func CreateCredential(ctx *gin.Context) {
 		return
 	}
 
-	credential, err := models.CreateCredential(data)
+	credential, err := controller.credential.CreateNewCredential(data)
 
 	if err != nil {
 		res := gin.H{"success": false, "message": "Internal Server Error"}
