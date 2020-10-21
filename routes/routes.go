@@ -16,9 +16,11 @@ const (
 
 func Init() *gin.Engine {
 	router := gin.Default()
-	router.GET(rootPath, controllers.Ping)
 
+	pingController := controllers.NewPingController()
 	credentialController := controllers.NewCredentialController(models.NewCredentialImplementation(db.DB))
+
+	router.GET(rootPath, pingController.Ping)
 
 	v1 := router.Group(v1Path)
 	{
