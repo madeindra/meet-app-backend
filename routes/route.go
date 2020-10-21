@@ -1,8 +1,8 @@
-package route
+package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/madeindra/meet-app/handler"
+	"github.com/madeindra/meet-app/controllers"
 )
 
 const (
@@ -14,11 +14,11 @@ const (
 
 func Init() *gin.Engine {
 	router := gin.Default()
-	router.GET(rootPath, handler.Ping)
+	router.GET(rootPath, controllers.Ping)
 
 	v1 := router.Group(v1Path)
 	{
-		v1.POST(userPath, handler.UserCreate)
+		v1.POST(userPath, controllers.UserCreate)
 	}
 
 	return router
