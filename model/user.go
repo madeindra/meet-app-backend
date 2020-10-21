@@ -5,7 +5,13 @@ type User struct {
 	Name string `json:"name"`
 }
 
-func CreateUser(data User) User {
-	DB.Create(&data)
-	return data
+func CreateUser(data User) (User, error) {
+	tx := DB.Begin()
+
+	if err := tx.Create(&data).Error; err != nil {
+		tx.Rollback()
+		return User{}, err
+	}
+
+	return data, tx.Commit().Error
 }

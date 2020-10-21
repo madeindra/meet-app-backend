@@ -15,7 +15,13 @@ func UserCreate(ctx *gin.Context) {
 		return
 	}
 
-	newUser := model.CreateUser(data)
+	newUser, err := model.CreateUser(data)
+
+	if err != nil {
+		res := gin.H{"success": false, "message": "Internal Server Error"}
+		ctx.JSON(http.StatusInternalServerError, res)
+		return
+	}
 
 	res := gin.H{"success": true, "data": newUser}
 	ctx.JSON(http.StatusOK, res)
