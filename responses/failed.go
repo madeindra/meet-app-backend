@@ -3,6 +3,8 @@ package responses
 const (
 	badRequestMessage           string = "Bad Request"
 	interenalServerErrorMessage string = "Internal Server Error"
+	notFoundMessage             string = "Not Found"
+	unauthorizedMessage         string = "Unauthorized"
 )
 
 type failed struct {
@@ -16,6 +18,14 @@ func failedResponse(message string) failed {
 
 func BadRequestResponse() failed {
 	return failedResponse(badRequestMessage)
+}
+
+func NotFoundResponse() failed {
+	return failedResponse(notFoundMessage)
+}
+
+func UnauthorizedResponse() failed {
+	return failedResponse(unauthorizedMessage)
 }
 
 func InterenalServerErrorResponse() failed {

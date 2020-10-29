@@ -1,7 +1,8 @@
 package responses
 
 const (
-	registerSuccessMessage = "Registration Successful"
+	registerSuccessMessage     = "Registration Successful"
+	authenticateSuccessMessage = "Authentication Successful"
 )
 
 type credentialResponse struct {
@@ -10,12 +11,29 @@ type credentialResponse struct {
 	Data    credentialData `json:"data"`
 }
 
+type authenticatedResponse struct {
+	Status  bool              `json:"status"`
+	Message string            `json:"message"`
+	Data    authenticatedData `json:"data"`
+}
+
 type credentialData struct {
 	ID    uint   `json:"id"`
 	Email string `json:"email"`
 }
 
+type authenticatedData struct {
+	ID    uint   `json:"id"`
+	Email string `json:"email"`
+	Token string `json:"token"`
+}
+
 func NewCredentialResponse(ID uint, email string) credentialResponse {
 	data := credentialData{ID: ID, Email: email}
 	return credentialResponse{Status: true, Message: registerSuccessMessage, Data: data}
+}
+
+func NewAuthenticatedResponse(ID uint, email string, token string) authenticatedResponse {
+	data := authenticatedData{ID: ID, Email: email, Token: token}
+	return authenticatedResponse{Status: true, Message: authenticateSuccessMessage, Data: data}
 }

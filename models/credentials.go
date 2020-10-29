@@ -10,6 +10,7 @@ type credentials struct {
 
 type CredentialInterface interface {
 	CreateNewCredential(data credentials) (credentials, error)
+	FindOneCredential(data credentials) credentials
 }
 
 type CredentialImplementation struct {
@@ -33,4 +34,13 @@ func (implementation *CredentialImplementation) CreateNewCredential(data credent
 	}
 
 	return data, tx.Commit().Error
+}
+
+func (implementation *CredentialImplementation) FindOneCredential(data credentials) credentials {
+	tx := implementation.db
+	res := credentials{}
+
+	tx.Where(data).First(&res)
+
+	return res
 }

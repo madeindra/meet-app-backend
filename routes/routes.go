@@ -13,7 +13,8 @@ const (
 	rootPath string = "/"
 	v1Path   string = "/api/v1"
 
-	registerPath string = "/registration"
+	registerPath     string = "/registration"
+	authenticatePath string = "/authentication"
 )
 
 func RouterInit() *gin.Engine {
@@ -29,6 +30,7 @@ func RouterInit() *gin.Engine {
 	v1 := router.Group(v1Path)
 	{
 		v1.POST(registerPath, credentialController.Create)
+		v1.POST(authenticatePath, credentialController.FindOne)
 	}
 
 	return router

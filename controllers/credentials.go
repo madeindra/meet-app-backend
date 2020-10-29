@@ -36,3 +36,24 @@ func (controller *CredentialController) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 	return
 }
+
+func (controller *CredentialController) FindOne(ctx *gin.Context) {
+	data := models.NewCredentialData()
+	if err := ctx.ShouldBindJSON(&data); err != nil {
+		res := responses.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	credential := controller.credential.FindOneCredential(data)
+
+	if credential.ID == 0 {
+		res := responses.UnauthorizedResponse()
+		ctx.JSON(http.StatusUnauthorized, res)
+		return
+	}
+
+	res := responses.NewAuthenticatedResponse(credential.ID, credential.Email, "fake token")
+	ctx.JSON(http.StatusOK, res)
+	return
+}
