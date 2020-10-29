@@ -1,7 +1,7 @@
 package models
 
-import "github.com/madeindra/meet-app/db"
+import "github.com/madeindra/meet-app/common"
 
 func Migrate() {
-	db.DB.AutoMigrate(&Credentials{})
+	common.DB.AutoMigrate(&Credentials{})
 }

@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/madeindra/meet-app/db"
+	"github.com/madeindra/meet-app/common"
 	"github.com/madeindra/meet-app/models"
 	"github.com/madeindra/meet-app/routes"
 )
 
 func main() {
-	db.Init()
+	common.DBInit()
 	models.Migrate()
-	defer db.Close()
+	defer common.DBClose()
 
 	server := routes.Init()
 	server.Run(":8080")

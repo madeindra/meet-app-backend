@@ -1,4 +1,4 @@
-package db
+package common
 
 import (
 	"github.com/jinzhu/gorm"
@@ -7,7 +7,7 @@ import (
 
 var DB *gorm.DB
 
-func Init() {
+func DBInit() {
 	conn, err := gorm.Open("sqlite3", ":memory:")
 
 	if err != nil {
@@ -17,6 +17,6 @@ func Init() {
 	DB = conn
 }
 
-func Close() {
+func DBClose() {
 	DB.Close()
 }
