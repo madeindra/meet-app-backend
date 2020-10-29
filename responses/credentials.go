@@ -1,5 +1,9 @@
 package responses
 
+const (
+	registerSuccessMessage = "Registration Successful"
+)
+
 type credentialResponse struct {
 	Status  bool           `json:"status"`
 	Message string         `json:"message"`
@@ -16,5 +20,5 @@ func NewCredentialData(ID uint, email string) credentialData {
 }
 
 func NewCredentialResponse(data credentialData) credentialResponse {
-	return credentialResponse{Status: true, Message: "Registration Successful", Data: data}
+	return credentialResponse{Status: true, Message: registerSuccessMessage, Data: data}
 }

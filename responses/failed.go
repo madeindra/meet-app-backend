@@ -1,7 +1,9 @@
 package responses
 
-const badRequestMessage string = "Bad Request"
-const interenalServerErrorMessage string = "Internal Server Error"
+const (
+	badRequestMessage           string = "Bad Request"
+	interenalServerErrorMessage string = "Internal Server Error"
+)
 
 type failed struct {
 	Status  bool   `json:"status"`
