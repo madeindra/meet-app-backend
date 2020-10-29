@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/madeindra/meet-app/models"
+	"github.com/madeindra/meet-app/responses"
 )
 
 type CredentialController struct {
@@ -18,7 +19,7 @@ func NewCredentialController(credential models.CredentialInterface) *CredentialC
 func (controller *CredentialController) Create(ctx *gin.Context) {
 	var data models.Credentials
 	if err := ctx.ShouldBindJSON(&data); err != nil {
-		res := gin.H{"success": false, "message": "Bad Request"}
+		res := responses.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
@@ -26,12 +27,13 @@ func (controller *CredentialController) Create(ctx *gin.Context) {
 	credential, err := controller.credential.CreateNewCredential(data)
 
 	if err != nil {
-		res := gin.H{"success": false, "message": "Internal Server Error"}
+		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := gin.H{"success": true, "data": credential}
+	resData := responses.NewCredentialData(credential.ID, credential.Email)
+	res := responses.NewCredentialResponse(resData)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
