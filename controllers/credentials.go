@@ -32,8 +32,7 @@ func (controller *CredentialController) Create(ctx *gin.Context) {
 		return
 	}
 
-	resData := responses.NewCredentialData(credential.ID, credential.Email)
-	res := responses.NewCredentialResponse(resData)
+	res := responses.NewCredentialResponse(credential.ID, credential.Email)
 	ctx.JSON(http.StatusOK, res)
 	return
 }

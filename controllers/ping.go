@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/madeindra/meet-app/responses"
 )
 
 type PingController struct{}
@@ -13,7 +14,7 @@ func NewPingController() *PingController {
 }
 
 func (ping PingController) Ping(ctx *gin.Context) {
-	res := gin.H{"success": true, "message": "Server is working properly"}
+	res := responses.NewPingResponse()
 	ctx.JSON(http.StatusOK, res)
 	return
 }

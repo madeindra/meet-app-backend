@@ -15,10 +15,7 @@ type credentialData struct {
 	Email string `json:"email"`
 }
 
-func NewCredentialData(ID uint, email string) credentialData {
-	return credentialData{ID: ID, Email: email}
-}
-
-func NewCredentialResponse(data credentialData) credentialResponse {
+func NewCredentialResponse(ID uint, email string) credentialResponse {
+	data := credentialData{ID: ID, Email: email}
 	return credentialResponse{Status: true, Message: registerSuccessMessage, Data: data}
 }
