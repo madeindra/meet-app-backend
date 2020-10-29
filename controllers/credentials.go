@@ -17,7 +17,7 @@ func NewCredentialController(credential models.CredentialInterface) *CredentialC
 }
 
 func (controller *CredentialController) Create(ctx *gin.Context) {
-	var data models.Credentials
+	data := models.NewCredentialData()
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := responses.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
