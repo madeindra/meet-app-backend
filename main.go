@@ -11,6 +11,6 @@ func main() {
 	models.Migrate()
 	defer common.DBClose()
 
-	server := routes.Init()
+	server := routes.RouterInit()
 	server.Run(":8080")
 }

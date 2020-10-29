@@ -15,7 +15,7 @@ const (
 	registerPath string = "/registration"
 )
 
-func Init() *gin.Engine {
+func RouterInit() *gin.Engine {
 	router := gin.Default()
 
 	binding.Validator = new(defaultValidator)
