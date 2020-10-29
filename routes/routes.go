@@ -6,6 +6,7 @@ import (
 	"github.com/madeindra/meet-app/common"
 	"github.com/madeindra/meet-app/controllers"
 	"github.com/madeindra/meet-app/models"
+	"github.com/madeindra/meet-app/validators"
 )
 
 const (
@@ -18,7 +19,7 @@ const (
 func RouterInit() *gin.Engine {
 	router := gin.Default()
 
-	binding.Validator = &defaultValidator{}
+	binding.Validator = &validators.DefaultValidator{}
 
 	pingController := controllers.NewPingController()
 	credentialController := controllers.NewCredentialController(models.NewCredentialImplementation(common.DB))
