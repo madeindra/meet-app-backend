@@ -19,7 +19,7 @@ const (
 func RouterInit() *gin.Engine {
 	router := gin.Default()
 
-	binding.Validator = &validators.DefaultValidator{}
+	binding.Validator = validators.NewValidator()
 
 	pingController := controllers.NewPingController()
 	credentialController := controllers.NewCredentialController(models.NewCredentialImplementation(common.DB))

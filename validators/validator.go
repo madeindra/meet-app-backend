@@ -15,6 +15,10 @@ type DefaultValidator struct {
 
 var _ binding.StructValidator = &DefaultValidator{}
 
+func NewValidator() *DefaultValidator {
+	return &DefaultValidator{}
+}
+
 func (v *DefaultValidator) ValidateStruct(obj interface{}) error {
 
 	if kindOfData(obj) == reflect.Struct {
