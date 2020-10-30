@@ -36,7 +36,7 @@ func RouterInit() *gin.Engine {
 		v1.POST(authenticatePath, credentialController.Login)
 
 		v1.GET(profilePath, profileController.GetCollections)
-		v1.GET(profilePath, profileController.GetSingle)
+		v1.GET(profileIdPath, profileController.GetSingle)
 		v1.POST(profilePath, profileController.Post)
 		v1.PUT(profilePath, profileController.Put)
 		v1.DELETE(profilePath, profileController.Delete)
