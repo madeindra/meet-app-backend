@@ -17,7 +17,7 @@ func NewCredentialController(credential models.CredentialInterface) *CredentialC
 	return &CredentialController{credential}
 }
 
-func (controller *CredentialController) Create(ctx *gin.Context) {
+func (controller *CredentialController) Register(ctx *gin.Context) {
 	data := models.NewCredentialData()
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := responses.BadRequestResponse()
@@ -47,7 +47,7 @@ func (controller *CredentialController) Create(ctx *gin.Context) {
 	return
 }
 
-func (controller *CredentialController) FindOne(ctx *gin.Context) {
+func (controller *CredentialController) Login(ctx *gin.Context) {
 	data := models.NewCredentialData()
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := responses.BadRequestResponse()
