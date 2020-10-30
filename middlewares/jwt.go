@@ -3,7 +3,6 @@ package middlewares
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -18,7 +17,6 @@ func Jwt() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := getBearerToken(ctx)
 		if err != nil {
-			log.Print("Token Not Found")
 			res := responses.UnauthorizedResponse()
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, res)
 			return
@@ -26,7 +24,6 @@ func Jwt() gin.HandlerFunc {
 
 		validated, err := validateBearerToken(token)
 		if err != nil {
-			log.Print("Token Not valid")
 			res := responses.UnauthorizedResponse()
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, res)
 			return
