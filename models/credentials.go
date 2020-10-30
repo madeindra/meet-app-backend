@@ -17,8 +17,8 @@ type CredentialImplementation struct {
 	db *gorm.DB
 }
 
-func NewCredentialData() credentials {
-	return credentials{}
+func NewCredentialData(email string, password string) credentials {
+	return credentials{Email: email, Password: password}
 }
 
 func NewCredentialImplementation(db *gorm.DB) *CredentialImplementation {
