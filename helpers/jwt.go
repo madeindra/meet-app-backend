@@ -9,6 +9,7 @@ import (
 //TODO: Get from env/config
 const signingKey = "signingkey"
 
+//TODO: Change to 1 hour if refresh token already implemented
 func CreateJWT(email string) (string, error) {
 	claims := &jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
