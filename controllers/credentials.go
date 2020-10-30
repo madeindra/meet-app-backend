@@ -34,7 +34,7 @@ func (controller *CredentialController) Create(ctx *gin.Context) {
 
 	data.Password = hash
 
-	credential, err := controller.credential.CreateNewCredential(data)
+	credential, err := controller.credential.Create(data)
 
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
@@ -58,7 +58,7 @@ func (controller *CredentialController) FindOne(ctx *gin.Context) {
 	user := models.NewCredentialData()
 	user.Email = data.Email
 
-	credential := controller.credential.FindOneCredential(user)
+	credential := controller.credential.FindOne(user)
 
 	if credential.ID == 0 {
 		res := responses.UnauthorizedResponse()

@@ -9,8 +9,8 @@ type credentials struct {
 }
 
 type CredentialInterface interface {
-	CreateNewCredential(data credentials) (credentials, error)
-	FindOneCredential(data credentials) credentials
+	Create(data credentials) (credentials, error)
+	FindOne(data credentials) credentials
 }
 
 type CredentialImplementation struct {
@@ -25,7 +25,7 @@ func NewCredentialImplementation(db *gorm.DB) *CredentialImplementation {
 	return &CredentialImplementation{db}
 }
 
-func (implementation *CredentialImplementation) CreateNewCredential(data credentials) (credentials, error) {
+func (implementation *CredentialImplementation) Create(data credentials) (credentials, error) {
 	tx := implementation.db.Begin()
 
 	if err := tx.Create(&data).Error; err != nil {
@@ -36,7 +36,7 @@ func (implementation *CredentialImplementation) CreateNewCredential(data credent
 	return data, tx.Commit().Error
 }
 
-func (implementation *CredentialImplementation) FindOneCredential(data credentials) credentials {
+func (implementation *CredentialImplementation) FindOne(data credentials) credentials {
 	tx := implementation.db
 	res := credentials{}
 
