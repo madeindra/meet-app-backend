@@ -35,6 +35,16 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 
 	data.Password = hash
 
+	user := models.NewCredentialData()
+	user.Email = data.Email
+
+	duplicate := controller.credential.FindOne(user)
+	if duplicate.ID != 0 {
+		res := responses.ConflictResponse()
+		ctx.JSON(http.StatusConflict, res)
+		return
+	}
+
 	credential, err := controller.credential.Create(data)
 
 	if err != nil {
