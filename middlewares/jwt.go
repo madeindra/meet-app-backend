@@ -11,6 +11,7 @@ import (
 	"github.com/madeindra/meet-app/responses"
 )
 
+//TODO: Get from env/config
 const signingKey = "signingkey"
 
 func Jwt() gin.HandlerFunc {

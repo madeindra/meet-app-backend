@@ -6,9 +6,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-const (
-	signingKey = "signingkey"
-)
+//TODO: Get from env/config
+const signingKey = "signingkey"
 
 func CreateJWT(email string) (string, error) {
 	claims := &jwt.StandardClaims{

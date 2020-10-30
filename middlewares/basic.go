@@ -2,6 +2,7 @@ package middlewares
 
 import "github.com/gin-gonic/gin"
 
+//TODO: Get from env/config
 const (
 	basicUsername = "foo"
 	basicPassword = "bar"
