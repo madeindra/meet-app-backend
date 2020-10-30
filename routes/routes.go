@@ -14,8 +14,9 @@ const (
 	rootPath string = "/"
 	v1Path   string = "/api/v1"
 
-	registerPath     string = "/registration"
 	authenticatePath string = "/authentication"
+	registerPath     string = "/registration"
+	loginPath        string = "/login"
 	profilePath      string = "/profiles"
 	profileIdPath    string = "/profiles/:id"
 )
@@ -32,18 +33,20 @@ func RouterInit() *gin.Engine {
 	router.GET(rootPath, pingController.Ping)
 
 	v1 := router.Group(v1Path)
-	{
-		v1.POST(registerPath, credentialController.Register)
-		v1.POST(authenticatePath, credentialController.Login)
+	auth := v1.Group(authenticatePath)
 
-		v1.Use(middlewares.Jwt())
+	auth.Use(middlewares.Basic())
 
-		v1.GET(profilePath, profileController.GetCollections)
-		v1.GET(profileIdPath, profileController.GetSingle)
-		v1.POST(profilePath, profileController.Post)
-		v1.PUT(profilePath, profileController.Put)
-		v1.DELETE(profilePath, profileController.Delete)
-	}
+	auth.POST(registerPath, credentialController.Register)
+	auth.POST(loginPath, credentialController.Login)
+
+	v1.Use(middlewares.Jwt())
+
+	v1.GET(profilePath, profileController.GetCollections)
+	v1.GET(profileIdPath, profileController.GetSingle)
+	v1.POST(profilePath, profileController.Post)
+	v1.PUT(profilePath, profileController.Put)
+	v1.DELETE(profilePath, profileController.Delete)
 
 	return router
 }
