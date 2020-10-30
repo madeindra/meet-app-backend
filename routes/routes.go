@@ -29,8 +29,8 @@ func RouterInit() *gin.Engine {
 
 	v1 := router.Group(v1Path)
 	{
-		v1.POST(registerPath, credentialController.Create)
-		v1.POST(authenticatePath, credentialController.FindOne)
+		v1.POST(registerPath, credentialController.Register)
+		v1.POST(authenticatePath, credentialController.Login)
 	}
 
 	return router
