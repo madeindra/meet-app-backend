@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/madeindra/meet-app/common"
 	"github.com/madeindra/meet-app/controllers"
+	"github.com/madeindra/meet-app/middlewares"
 	"github.com/madeindra/meet-app/models"
 	"github.com/madeindra/meet-app/validators"
 )
@@ -34,6 +35,8 @@ func RouterInit() *gin.Engine {
 	{
 		v1.POST(registerPath, credentialController.Register)
 		v1.POST(authenticatePath, credentialController.Login)
+
+		v1.Use(middlewares.Jwt())
 
 		v1.GET(profilePath, profileController.GetCollections)
 		v1.GET(profileIdPath, profileController.GetSingle)
