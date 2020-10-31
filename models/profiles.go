@@ -3,8 +3,8 @@ package models
 import "github.com/jinzhu/gorm"
 
 type profiles struct {
-	ID        uint   `json:"id" gorm:"primaryKey"`
-	UserID    uint   `json:"userId"`
+	ID        uint64 `json:"id" gorm:"primaryKey"`
+	UserID    uint64 `json:"userId"`
 	FirstName string `json:"firstName" binding:"required"`
 	LastName  string `json:"lastName" binding:"required"`
 }

@@ -3,7 +3,7 @@ package models
 import "github.com/jinzhu/gorm"
 
 type credentials struct {
-	ID       uint   `json:"id" gorm:"primaryKey"`
+	ID       uint64 `json:"id" gorm:"primaryKey"`
 	Email    string `json:"email" gorm:"unique" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
