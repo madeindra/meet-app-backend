@@ -9,6 +9,8 @@ import (
 	"github.com/madeindra/meet-app/common"
 )
 
+//TODO: Create Interface
+
 func CreateJWT(email string) (string, error) {
 	signingKey := common.GetBearerKey()
 	claims := &jwt.StandardClaims{

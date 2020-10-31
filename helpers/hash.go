@@ -6,6 +6,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+//TODO: Create Interface
+
 func GenerateHash(password string) (string, error) {
 	bytePassword := []byte(password)
 	byteHash, err := bcrypt.GenerateFromPassword(bytePassword, bcrypt.MinCost)
