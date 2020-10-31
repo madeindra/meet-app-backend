@@ -16,10 +16,10 @@ const (
 
 	authenticatePath string = "/authentication"
 	registerPath     string = "/registration"
-	tokenIdPath      string = "/token/:id"
+	tokenIDPath      string = "/token/:id"
 	loginPath        string = "/login"
 	profilePath      string = "/profiles"
-	profileIdPath    string = "/profiles/:id"
+	profileIDPath    string = "/profiles/:id"
 )
 
 func RouterInit() *gin.Engine {
@@ -45,10 +45,10 @@ func RouterInit() *gin.Engine {
 
 	v1.Use(middlewares.Jwt())
 
-	v1.GET(tokenIdPath, tokenController.GetSingle)
+	v1.GET(tokenIDPath, tokenController.GetSingle)
 
 	v1.GET(profilePath, profileController.GetCollections)
-	v1.GET(profileIdPath, profileController.GetSingle)
+	v1.GET(profileIDPath, profileController.GetSingle)
 	v1.POST(profilePath, profileController.Post)
 	v1.PUT(profilePath, profileController.Put)
 	v1.DELETE(profilePath, profileController.Delete)
