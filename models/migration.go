@@ -3,5 +3,6 @@ package models
 import "github.com/madeindra/meet-app/common"
 
 func Migrate() {
-	common.DB.AutoMigrate(&credentials{}, &profiles{})
+	db := common.GetDB()
+	db.AutoMigrate(&credentials{}, &profiles{})
 }

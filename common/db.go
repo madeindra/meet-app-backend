@@ -5,7 +5,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-var DB *gorm.DB
+var db *gorm.DB
 
 func DBInit() {
 	conn, err := gorm.Open("sqlite3", ":memory:")
@@ -14,9 +14,13 @@ func DBInit() {
 		panic("Failed while connecting to database")
 	}
 
-	DB = conn
+	db = conn
 }
 
 func DBClose() {
-	DB.Close()
+	db.Close()
+}
+
+func GetDB() *gorm.DB {
+	return db
 }

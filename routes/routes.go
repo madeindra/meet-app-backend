@@ -23,12 +23,13 @@ const (
 
 func RouterInit() *gin.Engine {
 	router := gin.Default()
+	db := common.GetDB()
 
 	binding.Validator = validators.NewValidator()
 
 	pingController := controllers.NewPingController()
-	credentialController := controllers.NewCredentialController(models.NewCredentialImplementation(common.DB))
-	profileController := controllers.NewProfileController(models.NewProfileImplementation(common.DB))
+	credentialController := controllers.NewCredentialController(models.NewCredentialImplementation(db))
+	profileController := controllers.NewProfileController(models.NewProfileImplementation(db))
 
 	router.GET(rootPath, pingController.Ping)
 
