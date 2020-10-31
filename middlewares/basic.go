@@ -6,11 +6,8 @@ import (
 )
 
 func Basic() gin.HandlerFunc {
-	var (
-		basicUsername string = common.GetBasicUsername()
-		basicPassword string = common.GetBasicPassword()
-	)
-
+	basicUsername := common.GetBasicUsername()
+	basicPassword := common.GetBasicPassword()
 	return gin.BasicAuth(gin.Accounts{
 		basicUsername: basicPassword,
 	})
