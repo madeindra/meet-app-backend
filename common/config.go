@@ -29,3 +29,7 @@ func GetBasicPassword() string {
 func GetBearerKey() string {
 	return viper.GetString("bearer.key")
 }
+
+func GetRefreshKey() string {
+	return viper.GetString("bearer.refreshKey")
+}

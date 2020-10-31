@@ -8,6 +8,7 @@ import (
 )
 
 var signingKey string = common.GetBearerKey()
+var refreshKey string = common.GetRefreshKey()
 
 func CreateJWT(email string) (string, error) {
 	claims := &jwt.StandardClaims{
@@ -35,7 +36,7 @@ func CreateRefreshToken(email string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := token.SignedString([]byte(signingKey))
+	tokenString, err := token.SignedString([]byte(refreshKey))
 	if err != nil {
 		return "", err
 	}
