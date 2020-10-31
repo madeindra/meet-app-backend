@@ -1,6 +1,8 @@
 package helpers
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -41,4 +43,26 @@ func CreateRefreshToken(email string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func ParseRefreshToken(token string) (string, error) {
+	refreshKey := common.GetRefreshKey()
+
+	validated, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(refreshKey), nil
+	})
+
+	if err != nil {
+		return "", errors.New("Failed parsing token")
+	}
+
+	if claims, ok := validated.Claims.(jwt.MapClaims); ok && validated.Valid {
+		return claims["sub"].(string), nil
+	}
+
+	return "", errors.New("Failed parsing token")
 }
