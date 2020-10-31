@@ -9,8 +9,24 @@ import (
 
 var signingKey string = common.GetBearerKey()
 
-//TODO: Change to 1 hour if refresh token already implemented
 func CreateJWT(email string) (string, error) {
+	claims := &jwt.StandardClaims{
+		IssuedAt:  time.Now().Unix(),
+		ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
+		Subject:   email,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tokenString, err := token.SignedString([]byte(signingKey))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+func CreateRefreshToken(email string) (string, error) {
 	claims := &jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
