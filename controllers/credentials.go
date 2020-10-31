@@ -12,10 +12,11 @@ import (
 //TODO: Create refresh token function
 type CredentialController struct {
 	credential models.CredentialInterface
+	token      models.TokenInterface
 }
 
-func NewCredentialController(credential models.CredentialInterface) *CredentialController {
-	return &CredentialController{credential}
+func NewCredentialController(credential models.CredentialInterface, token models.TokenInterface) *CredentialController {
+	return &CredentialController{credential, token}
 }
 
 func (controller *CredentialController) Register(ctx *gin.Context) {
@@ -90,6 +91,15 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
+	}
+
+	refreshTokenData := models.NewTokenData(credential.ID, refreshToken)
+	if _, err := controller.token.Update(refreshTokenData); err != nil {
+		if _, err := controller.token.Create(refreshTokenData); err != nil {
+			res := responses.InterenalServerErrorResponse()
+			ctx.JSON(http.StatusInternalServerError, res)
+			return
+		}
 	}
 
 	res := responses.NewAuthenticatedResponse(credential.ID, credential.Email, token, refreshToken)
