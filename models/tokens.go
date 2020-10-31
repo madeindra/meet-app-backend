@@ -8,7 +8,7 @@ import (
 
 type tokens struct {
 	ID           uint64 `json:"id" gorm:"primaryKey"`
-	UserID       uint64 `json:"userId" gorm:"unique" binding:"required"`
+	UserID       uint64 `json:"userId" gorm:"unique"`
 	RefreshToken string `json:"refreshToken" binding:"required"`
 }
 
@@ -54,7 +54,9 @@ func (implementation *TokenImplementation) Update(data tokens) (tokens, error) {
 	tx := implementation.db.Begin()
 	res := tokens{}
 
-	if err := tx.Model(&data).Update(data).Find(&res).Error; err != nil {
+	old := NewTokenData(data.ID, "")
+
+	if err := tx.Model(&old).Updates(data).Find(&res).Error; err != nil {
 		tx.Rollback()
 		return tokens{}, err
 	}
