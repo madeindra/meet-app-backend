@@ -36,6 +36,7 @@ func (controller *TokenController) GetSingle(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, token)
+	res := responses.NewTokenResponse(token.UserID, token.RefreshToken)
+	ctx.JSON(http.StatusOK, res)
 	return
 }
