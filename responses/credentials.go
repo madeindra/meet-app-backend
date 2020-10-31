@@ -23,9 +23,10 @@ type credentialData struct {
 }
 
 type authenticatedData struct {
-	ID    uint   `json:"id"`
-	Email string `json:"email"`
-	Token string `json:"token"`
+	ID           uint   `json:"id"`
+	Email        string `json:"email"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 func NewCredentialResponse(ID uint, email string) credentialResponse {
@@ -33,7 +34,7 @@ func NewCredentialResponse(ID uint, email string) credentialResponse {
 	return credentialResponse{Status: true, Message: registerSuccessMessage, Data: data}
 }
 
-func NewAuthenticatedResponse(ID uint, email string, token string) authenticatedResponse {
-	data := authenticatedData{ID: ID, Email: email, Token: token}
+func NewAuthenticatedResponse(ID uint, email string, token string, refreshToken string) authenticatedResponse {
+	data := authenticatedData{ID: ID, Email: email, Token: token, RefreshToken: refreshToken}
 	return authenticatedResponse{Status: true, Message: authenticateSuccessMessage, Data: data}
 }

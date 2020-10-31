@@ -85,7 +85,14 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
-	res := responses.NewAuthenticatedResponse(credential.ID, credential.Email, token)
+	refreshToken, err := helpers.CreateRefreshToken(credential.Email)
+	if err != nil {
+		res := responses.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	res := responses.NewAuthenticatedResponse(credential.ID, credential.Email, token, refreshToken)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
