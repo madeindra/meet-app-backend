@@ -16,6 +16,7 @@ const (
 
 	authenticatePath string = "/authentication"
 	registerPath     string = "/registration"
+	tokenIdPath      string = "/token/:id"
 	loginPath        string = "/login"
 	profilePath      string = "/profiles"
 	profileIdPath    string = "/profiles/:id"
@@ -28,7 +29,8 @@ func RouterInit() *gin.Engine {
 	binding.Validator = validators.NewValidator()
 
 	pingController := controllers.NewPingController()
-	credentialController := controllers.NewCredentialController(models.NewCredentialImplementation(db))
+	credentialController := controllers.NewCredentialController(models.NewCredentialImplementation(db), models.NewTokenImplementation(db))
+	tokenController := controllers.NewTokenController(models.NewTokenImplementation(db))
 	profileController := controllers.NewProfileController(models.NewProfileImplementation(db))
 
 	router.GET(rootPath, pingController.Ping)
@@ -42,6 +44,8 @@ func RouterInit() *gin.Engine {
 	auth.POST(loginPath, credentialController.Login)
 
 	v1.Use(middlewares.Jwt())
+
+	v1.GET(tokenIdPath, tokenController.GetSingle)
 
 	v1.GET(profilePath, profileController.GetCollections)
 	v1.GET(profileIdPath, profileController.GetSingle)
