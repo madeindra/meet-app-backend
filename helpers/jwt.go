@@ -9,9 +9,21 @@ import (
 	"github.com/madeindra/meet-app/common"
 )
 
-//TODO: Create Interface
+type JWTInterface interface {
+	CreateJWT(email string) (string, error)
+	CreateRefreshToken(email string) (string, error)
+	ParseRefreshToken(token string) (string, error)
+}
 
-func CreateJWT(email string) (string, error) {
+type JWTImplementation struct {
+	bearer JWTInterface
+}
+
+func NewJWTImplementation() *JWTImplementation {
+	return &JWTImplementation{}
+}
+
+func (bearer *JWTImplementation) CreateJWT(email string) (string, error) {
 	signingKey := common.GetBearerKey()
 	claims := &jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
@@ -29,7 +41,7 @@ func CreateJWT(email string) (string, error) {
 	return tokenString, nil
 }
 
-func CreateRefreshToken(email string) (string, error) {
+func (bearer *JWTImplementation) CreateRefreshToken(email string) (string, error) {
 	refreshKey := common.GetRefreshKey()
 	claims := &jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
@@ -47,7 +59,7 @@ func CreateRefreshToken(email string) (string, error) {
 	return tokenString, nil
 }
 
-func ParseRefreshToken(token string) (string, error) {
+func (bearer *JWTImplementation) ParseRefreshToken(token string) (string, error) {
 	refreshKey := common.GetRefreshKey()
 
 	validated, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
