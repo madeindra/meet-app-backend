@@ -7,10 +7,8 @@ import (
 	"github.com/madeindra/meet-app/common"
 )
 
-var signingKey string = common.GetBearerKey()
-var refreshKey string = common.GetRefreshKey()
-
 func CreateJWT(email string) (string, error) {
+	signingKey := common.GetBearerKey()
 	claims := &jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
 		ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
@@ -28,6 +26,7 @@ func CreateJWT(email string) (string, error) {
 }
 
 func CreateRefreshToken(email string) (string, error) {
+	refreshKey := common.GetRefreshKey()
 	claims := &jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),

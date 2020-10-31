@@ -12,8 +12,6 @@ import (
 	"github.com/madeindra/meet-app/responses"
 )
 
-var signingKey string = common.GetBearerKey()
-
 func Jwt() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := getBearerToken(ctx)
@@ -53,6 +51,8 @@ func getBearerToken(ctx *gin.Context) (string, error) {
 }
 
 func validateBearerToken(token string) (*jwt.Token, error) {
+	signingKey := common.GetBearerKey()
+
 	validated, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
