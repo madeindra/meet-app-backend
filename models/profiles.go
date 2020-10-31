@@ -18,7 +18,7 @@ type ProfilesImplementation struct {
 	db *gorm.DB
 }
 
-func NewProfileData(userId uint, firstName string, lastName string) profiles {
+func NewProfileData(userId uint64, firstName string, lastName string) profiles {
 	return profiles{UserID: userId, FirstName: firstName, LastName: lastName}
 }
 
