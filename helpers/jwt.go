@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/madeindra/meet-app/common"
 )
 
-//TODO: Get from env/config
-const signingKey = "signingkey"
+var signingKey string = common.GetBearerKey()
 
 //TODO: Change to 1 hour if refresh token already implemented
 func CreateJWT(email string) (string, error) {

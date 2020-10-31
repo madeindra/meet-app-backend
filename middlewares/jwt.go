@@ -8,11 +8,11 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/madeindra/meet-app/common"
 	"github.com/madeindra/meet-app/responses"
 )
 
-//TODO: Get from env/config
-const signingKey = "signingkey"
+var signingKey string = common.GetBearerKey()
 
 func Jwt() gin.HandlerFunc {
 	return func(ctx *gin.Context) {

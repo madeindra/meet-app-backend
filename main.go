@@ -7,10 +7,11 @@ import (
 )
 
 func main() {
+	common.ConfigInit()
 	common.DBInit()
 	models.Migrate()
 	defer common.DBClose()
 
 	server := routes.RouterInit()
-	server.Run(":8080")
+	server.Run(":" + common.GetServerPort())
 }
