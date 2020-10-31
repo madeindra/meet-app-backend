@@ -7,11 +7,11 @@ type tokenResponse struct {
 }
 
 type tokenData struct {
-	UserID       uint64 `json:"userId"`
+	Token        string `json:"token"`
 	RefreshToken string `json:"refreshToken"`
 }
 
-func NewTokenResponse(userID uint64, refreshToken string) tokenResponse {
-	data := tokenData{UserID: userID, RefreshToken: refreshToken}
+func NewTokenResponse(token string, refreshToken string) tokenResponse {
+	data := tokenData{Token: token, RefreshToken: refreshToken}
 	return tokenResponse{Status: true, Message: operationSuccessMessage, Data: data}
 }
