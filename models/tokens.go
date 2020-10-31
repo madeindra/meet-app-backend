@@ -8,7 +8,7 @@ import (
 
 type tokens struct {
 	ID           uint64 `json:"id" gorm:"primaryKey"`
-	userID       uint64 `json:"userId" gorm:"unique" binding:"required"`
+	UserID       uint64 `json:"userId" gorm:"unique" binding:"required"`
 	RefreshToken string `json:"refreshToken" binding:"required"`
 }
 
@@ -23,7 +23,7 @@ type TokenImplementation struct {
 }
 
 func NewTokenData(userID uint64, refreshToken string) tokens {
-	return tokens{userID: userID, RefreshToken: refreshToken}
+	return tokens{UserID: userID, RefreshToken: refreshToken}
 }
 
 func NewTokenImplementation(db *gorm.DB) *TokenImplementation {
