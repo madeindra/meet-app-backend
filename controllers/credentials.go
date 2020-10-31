@@ -9,14 +9,15 @@ import (
 	"github.com/madeindra/meet-app/responses"
 )
 
-//TODO: Create refresh token function
 type CredentialController struct {
 	credential models.CredentialInterface
 	token      models.TokenInterface
+	hash       helpers.HashInterface
+	bearer     helpers.JWTInterface
 }
 
-func NewCredentialController(credential models.CredentialInterface, token models.TokenInterface) *CredentialController {
-	return &CredentialController{credential, token}
+func NewCredentialController(credential models.CredentialInterface, token models.TokenInterface, hash helpers.HashInterface, bearer helpers.JWTInterface) *CredentialController {
+	return &CredentialController{credential, token, hash, bearer}
 }
 
 func (controller *CredentialController) Register(ctx *gin.Context) {
@@ -27,7 +28,7 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 		return
 	}
 
-	hash, err := helpers.GenerateHash(data.Password)
+	hash, err := controller.hash.GenerateHash(data.Password)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
@@ -72,21 +73,21 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
-	err := helpers.VerifyHash(credential.Password, data.Password)
+	err := controller.hash.VerifyHash(credential.Password, data.Password)
 	if err != nil {
 		res := responses.UnauthorizedResponse()
 		ctx.JSON(http.StatusUnauthorized, res)
 		return
 	}
 
-	token, err := helpers.CreateJWT(credential.Email)
+	token, err := controller.bearer.CreateJWT(credential.Email)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	refreshToken, err := helpers.CreateRefreshToken(credential.Email)
+	refreshToken, err := controller.bearer.CreateRefreshToken(credential.Email)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)

@@ -12,10 +12,11 @@ import (
 type TokenController struct {
 	token      models.TokenInterface
 	credential models.CredentialInterface
+	bearer     helpers.JWTInterface
 }
 
-func NewTokenController(token models.TokenInterface, credential models.CredentialInterface) *TokenController {
-	return &TokenController{token, credential}
+func NewTokenController(token models.TokenInterface, credential models.CredentialInterface, bearer helpers.JWTInterface) *TokenController {
+	return &TokenController{token, credential, bearer}
 }
 
 func (controller *TokenController) Refresh(ctx *gin.Context) {
@@ -26,7 +27,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	email, err := helpers.ParseRefreshToken(data.RefreshToken)
+	email, err := controller.bearer.ParseRefreshToken(data.RefreshToken)
 	if err != nil {
 		res := responses.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
@@ -49,14 +50,14 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	authToken, err := helpers.CreateJWT(userData.Email)
+	authToken, err := controller.bearer.CreateJWT(userData.Email)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	refreshToken, err := helpers.CreateRefreshToken(userData.Email)
+	refreshToken, err := controller.bearer.CreateRefreshToken(userData.Email)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)

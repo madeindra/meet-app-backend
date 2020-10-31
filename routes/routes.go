@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/madeindra/meet-app/common"
 	"github.com/madeindra/meet-app/controllers"
+	"github.com/madeindra/meet-app/helpers"
 	"github.com/madeindra/meet-app/middlewares"
 	"github.com/madeindra/meet-app/models"
 	"github.com/madeindra/meet-app/validators"
@@ -28,10 +29,17 @@ func RouterInit() *gin.Engine {
 
 	binding.Validator = validators.NewValidator()
 
+	hashHelper := helpers.NewHashImplementation()
+	bearerHelper := helpers.NewJWTImplementation()
+
+	credentialImplementation := models.NewCredentialImplementation(db)
+	tokenImplementation := models.NewTokenImplementation(db)
+	profileImplementation := models.NewProfileImplementation(db)
+
 	pingController := controllers.NewPingController()
-	credentialController := controllers.NewCredentialController(models.NewCredentialImplementation(db), models.NewTokenImplementation(db))
-	tokenController := controllers.NewTokenController(models.NewTokenImplementation(db), models.NewCredentialImplementation(db))
-	profileController := controllers.NewProfileController(models.NewProfileImplementation(db))
+	credentialController := controllers.NewCredentialController(credentialImplementation, tokenImplementation, hashHelper, bearerHelper)
+	tokenController := controllers.NewTokenController(tokenImplementation, credentialImplementation, bearerHelper)
+	profileController := controllers.NewProfileController(profileImplementation)
 
 	router.GET(rootPath, pingController.Ping)
 
