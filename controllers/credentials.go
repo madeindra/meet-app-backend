@@ -21,7 +21,7 @@ func NewCredentialController(credential models.CredentialInterface, token models
 }
 
 func (controller *CredentialController) Register(ctx *gin.Context) {
-	data := models.NewCredentialData("", "")
+	data := controller.credential.New("", "")
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := responses.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
@@ -37,7 +37,7 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 
 	data.Password = hash
 
-	user := models.NewCredentialData(data.Email, "")
+	user := controller.credential.New(data.Email, "")
 	duplicate := controller.credential.FindOne(user)
 	if duplicate.ID != 0 {
 		res := responses.ConflictResponse()
@@ -58,14 +58,14 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 }
 
 func (controller *CredentialController) Login(ctx *gin.Context) {
-	data := models.NewCredentialData("", "")
+	data := controller.credential.New("", "")
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := responses.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	user := models.NewCredentialData(data.Email, "")
+	user := controller.credential.New(data.Email, "")
 	credential := controller.credential.FindOne(user)
 	if credential.ID == 0 {
 		res := responses.UnauthorizedResponse()
@@ -94,7 +94,7 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
-	refreshTokenData := models.NewTokenData(credential.ID, refreshToken)
+	refreshTokenData := controller.token.New(credential.ID, refreshToken)
 	if _, err := controller.token.Update(refreshTokenData); err != nil {
 		if _, err := controller.token.Create(refreshTokenData); err != nil {
 			res := responses.InterenalServerErrorResponse()

@@ -20,7 +20,7 @@ func NewTokenController(token models.TokenInterface, credential models.Credentia
 }
 
 func (controller *TokenController) Refresh(ctx *gin.Context) {
-	data := models.NewTokenData(0, "")
+	data := controller.token.New(0, "")
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := responses.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
@@ -34,7 +34,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	user := models.NewCredentialData(email, "")
+	user := controller.credential.New(email, "")
 	userData := controller.credential.FindOne(user)
 	if userData.ID == 0 {
 		res := responses.NotFoundResponse()
@@ -42,7 +42,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	tokenData := models.NewTokenData(userData.ID, data.RefreshToken)
+	tokenData := controller.token.New(userData.ID, data.RefreshToken)
 	token := controller.token.FindOne(tokenData)
 	if token.ID == 0 {
 		res := responses.NotFoundResponse()
