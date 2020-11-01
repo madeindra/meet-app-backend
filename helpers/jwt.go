@@ -10,20 +10,20 @@ import (
 )
 
 type JWTInterface interface {
-	CreateJWT(email string) (string, error)
-	CreateRefreshToken(email string) (string, error)
-	ParseRefreshToken(token string) (string, error)
+	GenerateToken(email string) (string, error)
+	GenerateRefresh(email string) (string, error)
+	ParseRefresh(token string) (string, error)
 }
 
 type JWTImplementation struct {
 	bearer JWTInterface
 }
 
-func NewJWTImplementation() *JWTImplementation {
+func NewJWTHelper() *JWTImplementation {
 	return &JWTImplementation{}
 }
 
-func (bearer *JWTImplementation) CreateJWT(email string) (string, error) {
+func (bearer *JWTImplementation) GenerateToken(email string) (string, error) {
 	signingKey := common.GetBearerKey()
 	claims := &jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
@@ -41,7 +41,7 @@ func (bearer *JWTImplementation) CreateJWT(email string) (string, error) {
 	return tokenString, nil
 }
 
-func (bearer *JWTImplementation) CreateRefreshToken(email string) (string, error) {
+func (bearer *JWTImplementation) GenerateRefresh(email string) (string, error) {
 	refreshKey := common.GetRefreshKey()
 	claims := &jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
@@ -59,7 +59,7 @@ func (bearer *JWTImplementation) CreateRefreshToken(email string) (string, error
 	return tokenString, nil
 }
 
-func (bearer *JWTImplementation) ParseRefreshToken(token string) (string, error) {
+func (bearer *JWTImplementation) ParseRefresh(token string) (string, error) {
 	refreshKey := common.GetRefreshKey()
 
 	validated, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {

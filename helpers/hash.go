@@ -7,19 +7,19 @@ import (
 )
 
 type HashInterface interface {
-	GenerateHash(password string) (string, error)
-	VerifyHash(hashedPassword string, plainPassword string) error
+	Generate(password string) (string, error)
+	Verify(hashedPassword string, plainPassword string) error
 }
 
 type HashImplementation struct {
 	hash HashInterface
 }
 
-func NewHashImplementation() *HashImplementation {
+func NewHashHelper() *HashImplementation {
 	return &HashImplementation{}
 }
 
-func (hash *HashImplementation) GenerateHash(password string) (string, error) {
+func (hash *HashImplementation) Generate(password string) (string, error) {
 	bytePassword := []byte(password)
 	byteHash, err := bcrypt.GenerateFromPassword(bytePassword, bcrypt.MinCost)
 	if err != nil {
@@ -30,7 +30,7 @@ func (hash *HashImplementation) GenerateHash(password string) (string, error) {
 	return hashed, nil
 }
 
-func (hash *HashImplementation) VerifyHash(hashedPassword string, plainPassword string) error {
+func (hash *HashImplementation) Verify(hashedPassword string, plainPassword string) error {
 	byteHash := []byte(hashedPassword)
 	bytePassword := []byte(plainPassword)
 
