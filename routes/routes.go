@@ -29,8 +29,8 @@ func RouterInit() *gin.Engine {
 
 	binding.Validator = validators.NewValidator()
 
-	hashHelper := helpers.NewHashImplementation()
-	bearerHelper := helpers.NewJWTImplementation()
+	hashHelper := helpers.NewHashHelper()
+	bearerHelper := helpers.NewJWTHelper()
 
 	credentialImplementation := models.NewCredentialImplementation(db)
 	tokenImplementation := models.NewTokenImplementation(db)

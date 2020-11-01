@@ -27,7 +27,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	email, err := controller.bearer.ParseRefreshToken(data.RefreshToken)
+	email, err := controller.bearer.ParseRefresh(data.RefreshToken)
 	if err != nil {
 		res := responses.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
@@ -50,14 +50,14 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	authToken, err := controller.bearer.CreateJWT(userData.Email)
+	authToken, err := controller.bearer.GenerateToken(userData.Email)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	refreshToken, err := controller.bearer.CreateRefreshToken(userData.Email)
+	refreshToken, err := controller.bearer.GenerateRefresh(userData.Email)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)

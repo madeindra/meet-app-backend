@@ -28,7 +28,7 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 		return
 	}
 
-	hash, err := controller.hash.GenerateHash(data.Password)
+	hash, err := controller.hash.Generate(data.Password)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
@@ -73,21 +73,21 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
-	err := controller.hash.VerifyHash(credential.Password, data.Password)
+	err := controller.hash.Verify(credential.Password, data.Password)
 	if err != nil {
 		res := responses.UnauthorizedResponse()
 		ctx.JSON(http.StatusUnauthorized, res)
 		return
 	}
 
-	token, err := controller.bearer.CreateJWT(credential.Email)
+	token, err := controller.bearer.GenerateToken(credential.Email)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	refreshToken, err := controller.bearer.CreateRefreshToken(credential.Email)
+	refreshToken, err := controller.bearer.GenerateRefresh(credential.Email)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
