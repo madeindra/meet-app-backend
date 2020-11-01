@@ -9,6 +9,7 @@ type credentials struct {
 }
 
 type CredentialInterface interface {
+	New(email string, password string) credentials
 	Create(data credentials) (credentials, error)
 	FindOne(data credentials) credentials
 }
@@ -17,12 +18,12 @@ type CredentialImplementation struct {
 	db *gorm.DB
 }
 
-func NewCredentialData(email string, password string) credentials {
-	return credentials{Email: email, Password: password}
-}
-
 func NewCredentialImplementation(db *gorm.DB) *CredentialImplementation {
 	return &CredentialImplementation{db}
+}
+
+func (implementation *CredentialImplementation) New(email string, password string) credentials {
+	return credentials{Email: email, Password: password}
 }
 
 func (implementation *CredentialImplementation) Create(data credentials) (credentials, error) {

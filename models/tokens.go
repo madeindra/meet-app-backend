@@ -13,6 +13,7 @@ type tokens struct {
 }
 
 type TokenInterface interface {
+	New(userID uint64, refreshToken string) tokens
 	Create(data tokens) (tokens, error)
 	FindOne(data tokens) tokens
 	Update(data tokens) (tokens, error)
@@ -22,12 +23,12 @@ type TokenImplementation struct {
 	db *gorm.DB
 }
 
-func NewTokenData(userID uint64, refreshToken string) tokens {
-	return tokens{UserID: userID, RefreshToken: refreshToken}
-}
-
 func NewTokenImplementation(db *gorm.DB) *TokenImplementation {
 	return &TokenImplementation{db}
+}
+
+func (implementation *TokenImplementation) New(userID uint64, refreshToken string) tokens {
+	return tokens{UserID: userID, RefreshToken: refreshToken}
 }
 
 func (implementation *TokenImplementation) Create(data tokens) (tokens, error) {
@@ -54,7 +55,7 @@ func (implementation *TokenImplementation) Update(data tokens) (tokens, error) {
 	tx := implementation.db.Begin()
 	res := tokens{}
 
-	old := NewTokenData(data.ID, "")
+	old := implementation.New(data.ID, "")
 
 	if err := tx.Model(&old).Updates(data).Find(&res).Error; err != nil {
 		tx.Rollback()
