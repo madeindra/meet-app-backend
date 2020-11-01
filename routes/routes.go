@@ -32,14 +32,14 @@ func RouterInit() *gin.Engine {
 	hashHelper := helpers.NewHashHelper()
 	bearerHelper := helpers.NewJWTHelper()
 
-	credentialImplementation := models.NewCredentialImplementation(db)
-	tokenImplementation := models.NewTokenImplementation(db)
-	profileImplementation := models.NewProfileImplementation(db)
+	credentialModel := models.NewCredentialModel(db)
+	tokenModel := models.NewTokenModel(db)
+	profileModel := models.NewProfileModel(db)
 
 	pingController := controllers.NewPingController()
-	credentialController := controllers.NewCredentialController(credentialImplementation, tokenImplementation, hashHelper, bearerHelper)
-	tokenController := controllers.NewTokenController(tokenImplementation, credentialImplementation, bearerHelper)
-	profileController := controllers.NewProfileController(profileImplementation)
+	credentialController := controllers.NewCredentialController(credentialModel, tokenModel, hashHelper, bearerHelper)
+	tokenController := controllers.NewTokenController(tokenModel, credentialModel, bearerHelper)
+	profileController := controllers.NewProfileController(profileModel)
 
 	router.GET(rootPath, pingController.Ping)
 
