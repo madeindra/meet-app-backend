@@ -9,8 +9,9 @@ import (
 func main() {
 	common.ConfigInit()
 	common.DBInit()
-	models.Migrate()
 	defer common.DBClose()
+
+	models.Migrate()
 
 	server := routes.RouterInit()
 	server.Run(":" + common.GetServerPort())
