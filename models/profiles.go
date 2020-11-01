@@ -10,6 +10,7 @@ type profiles struct {
 }
 
 type ProfilesInterface interface {
+	New(userId uint64, firstName string, lastName string) profiles
 	Create(data profiles) (profiles, error)
 	FindOne(data profiles) profiles
 }
@@ -18,12 +19,12 @@ type ProfilesImplementation struct {
 	db *gorm.DB
 }
 
-func NewProfileData(userId uint64, firstName string, lastName string) profiles {
-	return profiles{UserID: userId, FirstName: firstName, LastName: lastName}
+func NewProfileModel(db *gorm.DB) *ProfilesImplementation {
+	return &ProfilesImplementation{db}
 }
 
-func NewProfileImplementation(db *gorm.DB) *ProfilesImplementation {
-	return &ProfilesImplementation{db}
+func (implementation *ProfilesImplementation) New(userId uint64, firstName string, lastName string) profiles {
+	return profiles{UserID: userId, FirstName: firstName, LastName: lastName}
 }
 
 func (implementation *ProfilesImplementation) Create(data profiles) (profiles, error) {

@@ -23,7 +23,7 @@ type TokenImplementation struct {
 	db *gorm.DB
 }
 
-func NewTokenImplementation(db *gorm.DB) *TokenImplementation {
+func NewTokenModel(db *gorm.DB) *TokenImplementation {
 	return &TokenImplementation{db}
 }
 

@@ -18,7 +18,7 @@ type CredentialImplementation struct {
 	db *gorm.DB
 }
 
-func NewCredentialImplementation(db *gorm.DB) *CredentialImplementation {
+func NewCredentialModel(db *gorm.DB) *CredentialImplementation {
 	return &CredentialImplementation{db}
 }
 
