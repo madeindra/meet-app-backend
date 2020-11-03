@@ -55,15 +55,13 @@ func (implementation *TokenImplementation) Update(data tokens) (tokens, error) {
 	tx := implementation.db.Begin()
 	res := tokens{}
 
-	old := implementation.New(data.ID, "")
-
-	if err := tx.Model(&old).Updates(data).Find(&res).Error; err != nil {
+	if err := tx.First(&res, data.ID).Updates(data).Error; err != nil {
 		tx.Rollback()
 		return tokens{}, err
 	}
 
 	if res.ID == 0 {
-		return tokens{}, errors.New("Token not found")
+		return tokens{}, errors.New("Not found")
 	}
 
 	return res, tx.Commit().Error
