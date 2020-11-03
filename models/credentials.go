@@ -38,10 +38,9 @@ func (implementation *CredentialImplementation) Create(data credentials) (creden
 }
 
 func (implementation *CredentialImplementation) FindOne(data credentials) credentials {
-	tx := implementation.db
 	res := credentials{}
 
-	tx.Where(data).First(&res)
+	implementation.db.Where(data).First(&res)
 
 	return res
 }
