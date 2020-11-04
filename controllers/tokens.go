@@ -43,7 +43,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 	}
 
 	tokenData := controller.token.New(userData.ID, data.RefreshToken)
-	token := controller.token.FindOne(tokenData)
+	token := controller.token.FindByUser(tokenData)
 	if token.ID == 0 {
 		res := responses.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, res)

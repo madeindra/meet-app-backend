@@ -15,7 +15,7 @@ type tokens struct {
 type TokenInterface interface {
 	New(userID uint64, refreshToken string) tokens
 	Create(data tokens) (tokens, error)
-	FindOne(data tokens) tokens
+	FindByUser(data tokens) tokens
 	Update(data tokens) (tokens, error)
 }
 
@@ -42,7 +42,7 @@ func (implementation *TokenImplementation) Create(data tokens) (tokens, error) {
 	return data, tx.Commit().Error
 }
 
-func (implementation *TokenImplementation) FindOne(data tokens) tokens {
+func (implementation *TokenImplementation) FindByUser(data tokens) tokens {
 	tx := implementation.db
 	res := tokens{}
 
