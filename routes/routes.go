@@ -54,11 +54,10 @@ func RouterInit() *gin.Engine {
 
 	v1.Use(middlewares.Jwt())
 
-	v1.GET(profilePath, profileController.GetCollections)
 	v1.GET(profileIDPath, profileController.GetSingle)
+	v1.PUT(profileIDPath, profileController.Put)
+	v1.DELETE(profileIDPath, profileController.Delete)
+	v1.GET(profilePath, profileController.GetCollections)
 	v1.POST(profilePath, profileController.Post)
-	v1.PUT(profilePath, profileController.Put)
-	v1.DELETE(profilePath, profileController.Delete)
-
 	return router
 }
