@@ -1,8 +1,6 @@
 package models
 
 import (
-	"errors"
-
 	"github.com/jinzhu/gorm"
 )
 
@@ -71,10 +69,6 @@ func (implementation *ProfilesImplementation) UpdateByUser(data profiles) (profi
 	if err := tx.First(&res).Updates(data).Error; err != nil {
 		tx.Rollback()
 		return profiles{}, err
-	}
-
-	if res.ID == 0 {
-		return profiles{}, errors.New("Not found")
 	}
 
 	return res, tx.Commit().Error
