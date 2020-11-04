@@ -18,16 +18,33 @@ func NewProfileController(profile models.ProfilesInterface) *ProfilesController 
 }
 
 func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
-	id, _ := strconv.ParseUint(ctx.Param("id"), 10, 64)
-	data := controller.profile.New(id, "", "", "", 0, 0)
+	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		res := responses.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
 
+	data := controller.profile.New(id, "", "", "", 0, 0)
 	res := controller.profile.FindByUser(data)
+	if res.ID == 0 {
+		res := responses.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
+		return
+	}
+
 	ctx.JSON(http.StatusOK, res)
 	return
 }
 
 func (controller *ProfilesController) GetCollections(ctx *gin.Context) {
 	res := controller.profile.FindAll()
+	if len(res) == 0 {
+		res := responses.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
+		return
+	}
+
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -52,25 +69,62 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 }
 
 func (controller *ProfilesController) Put(ctx *gin.Context) {
-	id, _ := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		res := responses.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
 
 	data := controller.profile.New(id, "", "", "", 0, 0)
+
+	res := controller.profile.FindByUser(data)
+	if res.ID == 0 {
+		res := responses.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
+		return
+	}
+
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := responses.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	res, _ := controller.profile.UpdateByUser(data)
+	// Disable update ID
+	res, err = controller.profile.UpdateByUser(data)
+	if err != nil {
+		res := responses.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
 	ctx.JSON(http.StatusOK, res)
 	return
 }
 
 func (controller *ProfilesController) Delete(ctx *gin.Context) {
-	id, _ := strconv.ParseUint(ctx.Param("id"), 10, 64)
-	data := controller.profile.New(id, "", "", "", 0, 0)
+	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		res := responses.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
 
-	res := controller.profile.DeleteByUser(data)
-	ctx.JSON(http.StatusNoContent, res)
+	data := controller.profile.New(id, "", "", "", 0, 0)
+	res := controller.profile.FindByUser(data)
+	if res.ID == 0 {
+		res := responses.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
+		return
+	}
+
+	if err := controller.profile.DeleteByUser(data); err != nil {
+		res := responses.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
 	return
 }
