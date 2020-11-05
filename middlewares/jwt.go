@@ -9,21 +9,21 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/madeindra/meet-app/common"
-	"github.com/madeindra/meet-app/responses"
+	"github.com/madeindra/meet-app/entities"
 )
 
 func Jwt() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := getBearerToken(ctx)
 		if err != nil {
-			res := responses.UnauthorizedResponse()
+			res := entities.UnauthorizedResponse()
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, res)
 			return
 		}
 
 		validated, err := validateBearerToken(token)
 		if err != nil {
-			res := responses.UnauthorizedResponse()
+			res := entities.UnauthorizedResponse()
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, res)
 			return
 		}

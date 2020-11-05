@@ -1,4 +1,4 @@
-package responses
+package entities
 
 import "github.com/madeindra/meet-app/models"
 

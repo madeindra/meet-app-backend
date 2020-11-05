@@ -1,4 +1,4 @@
-package responses
+package entities
 
 const (
 	operationSuccessMessage = "Operation successful"

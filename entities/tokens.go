@@ -1,4 +1,4 @@
-package responses
+package entities
 
 type tokenResponse struct {
 	Status  bool      `json:"status"`

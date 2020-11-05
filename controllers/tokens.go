@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/madeindra/meet-app/entities"
 	"github.com/madeindra/meet-app/helpers"
 	"github.com/madeindra/meet-app/models"
-	"github.com/madeindra/meet-app/responses"
 )
 
 type TokenController struct {
@@ -22,14 +22,14 @@ func NewTokenController(token models.TokenInterface, credential models.Credentia
 func (controller *TokenController) Refresh(ctx *gin.Context) {
 	data := controller.token.New(0, "")
 	if err := ctx.ShouldBindJSON(&data); err != nil {
-		res := responses.BadRequestResponse()
+		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	email, err := controller.bearer.ParseRefresh(data.RefreshToken)
 	if err != nil {
-		res := responses.BadRequestResponse()
+		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
@@ -37,7 +37,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 	user := controller.credential.New(email, "")
 	userData := controller.credential.FindOne(user)
 	if userData.ID == 0 {
-		res := responses.NotFoundResponse()
+		res := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
@@ -45,33 +45,33 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 	tokenData := controller.token.New(userData.ID, data.RefreshToken)
 	token := controller.token.FindByUser(tokenData)
 	if token.ID == 0 {
-		res := responses.NotFoundResponse()
+		res := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
 	authToken, err := controller.bearer.GenerateToken(userData.Email)
 	if err != nil {
-		res := responses.InterenalServerErrorResponse()
+		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
 	refreshToken, err := controller.bearer.GenerateRefresh(userData.Email)
 	if err != nil {
-		res := responses.InterenalServerErrorResponse()
+		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
 	token.RefreshToken = refreshToken
 	if _, err := controller.token.Update(token); err != nil {
-		res := responses.InterenalServerErrorResponse()
+		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := responses.NewTokenResponse(authToken, token.RefreshToken)
+	res := entities.NewTokenResponse(authToken, token.RefreshToken)
 	ctx.JSON(http.StatusOK, res)
 	return
 }

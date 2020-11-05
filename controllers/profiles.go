@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/madeindra/meet-app/entities"
 	"github.com/madeindra/meet-app/models"
-	"github.com/madeindra/meet-app/responses"
 )
 
 type ProfilesController struct {
@@ -20,7 +20,7 @@ func NewProfileController(profile models.ProfilesInterface) *ProfilesController 
 func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		profile := responses.BadRequestResponse()
+		profile := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, profile)
 		return
 	}
@@ -30,12 +30,12 @@ func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 
 	profile := controller.profile.FindByUser(data)
 	if profile.ID == 0 {
-		profile := responses.NotFoundResponse()
+		profile := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, profile)
 		return
 	}
 
-	res := responses.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -43,20 +43,20 @@ func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 func (controller *ProfilesController) GetCollections(ctx *gin.Context) {
 	profile := controller.profile.FindAll()
 	if len(profile) == 0 {
-		profile := responses.NotFoundResponse()
+		profile := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, profile)
 		return
 	}
 
-	res := responses.NewProfileBatchResponse(profile)
+	res := entities.NewProfileBatchResponse(profile)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
 
 func (controller *ProfilesController) Post(ctx *gin.Context) {
-	req := responses.NewProfileData()
+	req := entities.NewProfileData()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		res := responses.BadRequestResponse()
+		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
@@ -66,7 +66,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 
 	duplicate := controller.profile.FindByUser(checkExisting)
 	if duplicate.ID != 0 {
-		res := responses.ConflictResponse()
+		res := entities.ConflictResponse()
 		ctx.JSON(http.StatusConflict, res)
 		return
 	}
@@ -81,12 +81,12 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 
 	profile, err := controller.profile.Create(data)
 	if err != nil {
-		res := responses.InterenalServerErrorResponse()
+		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := responses.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusCreated, res)
 	return
 }
@@ -94,7 +94,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 func (controller *ProfilesController) Put(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		profile := responses.BadRequestResponse()
+		profile := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, profile)
 		return
 	}
@@ -104,14 +104,14 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 
 	exist := controller.profile.FindByUser(checkExisting)
 	if exist.ID == 0 {
-		profile := responses.NotFoundResponse()
+		profile := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, profile)
 		return
 	}
 
-	req := responses.NewProfileData()
+	req := entities.NewProfileData()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		profile := responses.BadRequestResponse()
+		profile := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, profile)
 		return
 	}
@@ -126,12 +126,12 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 
 	profile, err := controller.profile.UpdateByUser(data)
 	if err != nil {
-		res := responses.InterenalServerErrorResponse()
+		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := responses.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -139,7 +139,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 func (controller *ProfilesController) Delete(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		profile := responses.BadRequestResponse()
+		profile := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, profile)
 		return
 	}
@@ -149,13 +149,13 @@ func (controller *ProfilesController) Delete(ctx *gin.Context) {
 
 	profile := controller.profile.FindByUser(data)
 	if profile.ID == 0 {
-		profile := responses.NotFoundResponse()
+		profile := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, profile)
 		return
 	}
 
 	if err := controller.profile.DeleteByUser(data); err != nil {
-		profile := responses.InterenalServerErrorResponse()
+		profile := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, profile)
 		return
 	}
