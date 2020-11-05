@@ -25,7 +25,9 @@ func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 		return
 	}
 
-	data := controller.profile.New(id, "", "", "", 0, 0)
+	data := controller.profile.New()
+	data.UserID = id
+
 	profile := controller.profile.FindByUser(data)
 	if profile.ID == 0 {
 		profile := responses.NotFoundResponse()
@@ -52,14 +54,16 @@ func (controller *ProfilesController) GetCollections(ctx *gin.Context) {
 }
 
 func (controller *ProfilesController) Post(ctx *gin.Context) {
-	data := controller.profile.New(0, "", "", "", 0, 0)
-	if err := ctx.ShouldBindJSON(&data); err != nil {
+	req := responses.NewProfileRequest()
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := responses.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	checkExisting := controller.profile.New(data.UserID, "", "", "", 0, 0)
+	checkExisting := controller.profile.New()
+	checkExisting.UserID = req.UserID
+
 	duplicate := controller.profile.FindByUser(checkExisting)
 	if duplicate.ID != 0 {
 		res := responses.ConflictResponse()
@@ -67,7 +71,14 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: Disable ID Input
+	data := controller.profile.New()
+	data.UserID = req.UserID
+	data.FirstName = req.FirstName
+	data.LastName = req.LastName
+	data.Description = req.Description
+	data.Latitude = req.Latitude
+	data.Longitude = req.Longitude
+
 	profile, err := controller.profile.Create(data)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
@@ -88,27 +99,35 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 		return
 	}
 
-	data := controller.profile.New(id, "", "", "", 0, 0)
+	checkExisting := controller.profile.New()
+	checkExisting.UserID = id
 
-	profile := controller.profile.FindByUser(data)
-	if profile.ID == 0 {
+	exist := controller.profile.FindByUser(checkExisting)
+	if exist.ID == 0 {
 		profile := responses.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, profile)
 		return
 	}
 
-	if err := ctx.ShouldBindJSON(&data); err != nil {
+	req := responses.NewProfileRequest()
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		profile := responses.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, profile)
 		return
 	}
 
-	// TODO: Disable ID update
-	// TODO: Disable userId update
-	profile, err = controller.profile.UpdateByUser(data)
+	data := controller.profile.New()
+	data.UserID = req.UserID
+	data.FirstName = req.FirstName
+	data.LastName = req.LastName
+	data.Description = req.Description
+	data.Latitude = req.Latitude
+	data.Longitude = req.Longitude
+
+	profile, err := controller.profile.UpdateByUser(data)
 	if err != nil {
-		profile := responses.InterenalServerErrorResponse()
-		ctx.JSON(http.StatusInternalServerError, profile)
+		res := responses.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
@@ -125,7 +144,9 @@ func (controller *ProfilesController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	data := controller.profile.New(id, "", "", "", 0, 0)
+	data := controller.profile.New()
+	data.UserID = id
+
 	profile := controller.profile.FindByUser(data)
 	if profile.ID == 0 {
 		profile := responses.NotFoundResponse()
