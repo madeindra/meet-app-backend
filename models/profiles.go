@@ -7,8 +7,8 @@ import (
 type profiles struct {
 	ID          uint64  `json:"id" gorm:"primaryKey"`
 	UserID      uint64  `json:"userId" binding:"required"`
-	FirstName   string  `json:"firstName" binding:"required"`
-	LastName    string  `json:"lastName" binding:"required"`
+	FirstName   string  `json:"firstName"`
+	LastName    string  `json:"lastName"`
 	Description string  `json:"description"`
 	Latitude    float64 `json:"latitude"`
 	Longitude   float64 `json:"longitude"`
