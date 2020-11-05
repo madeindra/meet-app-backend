@@ -20,31 +20,33 @@ func NewProfileController(profile models.ProfilesInterface) *ProfilesController 
 func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		res := responses.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, res)
+		profile := responses.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, profile)
 		return
 	}
 
 	data := controller.profile.New(id, "", "", "", 0, 0)
-	res := controller.profile.FindByUser(data)
-	if res.ID == 0 {
-		res := responses.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, res)
+	profile := controller.profile.FindByUser(data)
+	if profile.ID == 0 {
+		profile := responses.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, profile)
 		return
 	}
 
+	res := responses.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
 
 func (controller *ProfilesController) GetCollections(ctx *gin.Context) {
-	res := controller.profile.FindAll()
-	if len(res) == 0 {
-		res := responses.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, res)
+	profile := controller.profile.FindAll()
+	if len(profile) == 0 {
+		profile := responses.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, profile)
 		return
 	}
 
+	res := responses.NewProfileBatchResponse(profile)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -57,13 +59,23 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 		return
 	}
 
-	res, err := controller.profile.Create(data)
+	checkExisting := controller.profile.New(data.UserID, "", "", "", 0, 0)
+	duplicate := controller.profile.FindByUser(checkExisting)
+	if duplicate.ID != 0 {
+		res := responses.ConflictResponse()
+		ctx.JSON(http.StatusConflict, res)
+		return
+	}
+
+	// TODO: Disable ID Input
+	profile, err := controller.profile.Create(data)
 	if err != nil {
 		res := responses.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
+	res := responses.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusCreated, res)
 	return
 }
@@ -71,34 +83,36 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 func (controller *ProfilesController) Put(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		res := responses.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, res)
+		profile := responses.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, profile)
 		return
 	}
 
 	data := controller.profile.New(id, "", "", "", 0, 0)
 
-	res := controller.profile.FindByUser(data)
-	if res.ID == 0 {
-		res := responses.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, res)
+	profile := controller.profile.FindByUser(data)
+	if profile.ID == 0 {
+		profile := responses.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, profile)
 		return
 	}
 
 	if err := ctx.ShouldBindJSON(&data); err != nil {
-		res := responses.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, res)
+		profile := responses.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, profile)
 		return
 	}
 
-	// Disable update ID
-	res, err = controller.profile.UpdateByUser(data)
+	// TODO: Disable ID update
+	// TODO: Disable userId update
+	profile, err = controller.profile.UpdateByUser(data)
 	if err != nil {
-		res := responses.InterenalServerErrorResponse()
-		ctx.JSON(http.StatusInternalServerError, res)
+		profile := responses.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, profile)
 		return
 	}
 
+	res := responses.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -106,22 +120,22 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 func (controller *ProfilesController) Delete(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		res := responses.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, res)
+		profile := responses.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, profile)
 		return
 	}
 
 	data := controller.profile.New(id, "", "", "", 0, 0)
-	res := controller.profile.FindByUser(data)
-	if res.ID == 0 {
-		res := responses.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, res)
+	profile := controller.profile.FindByUser(data)
+	if profile.ID == 0 {
+		profile := responses.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, profile)
 		return
 	}
 
 	if err := controller.profile.DeleteByUser(data); err != nil {
-		res := responses.InterenalServerErrorResponse()
-		ctx.JSON(http.StatusInternalServerError, res)
+		profile := responses.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, profile)
 		return
 	}
 
