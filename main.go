@@ -16,3 +16,9 @@ func main() {
 	server := routes.RouterInit()
 	server.Run(":" + common.GetServerPort())
 }
+
+//TODO: Create Request Body & NewRequest() for Credential & Token
+//TODO: Change New() Model for Credential & Token
+//TODO: Update Response Body for Credential & Token
+//TODO: Update Model following profiles (don't include primary key) (change function)
+//TODO: Update Controller following profiles (create new request & set values) (bind to request body type)
