@@ -2,6 +2,15 @@ package responses
 
 import "github.com/madeindra/meet-app/models"
 
+type profileRequest struct {
+	UserID      uint64  `json:"userId"`
+	FirstName   string  `json:"firstName"`
+	LastName    string  `json:"lastName"`
+	Description string  `json:"description"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+}
+
 type profileResponse struct {
 	Status  bool        `json:"status"`
 	Message string      `json:"message"`
@@ -21,6 +30,10 @@ type profileData struct {
 	Description string  `json:"description"`
 	Latitude    float64 `json:"latitude"`
 	Longitude   float64 `json:"longitude"`
+}
+
+func NewProfileRequest() profileRequest {
+	return profileRequest{}
 }
 
 func NewProfileResponse(userId uint64, firstName string, lastName string, description string, latitude float64, longitude float64) profileResponse {
