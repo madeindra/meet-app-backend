@@ -5,17 +5,17 @@ import (
 )
 
 type Profiles struct {
-	ID          uint64  `json:"id" gorm:"primaryKey"`
-	UserID      uint64  `json:"userId" binding:"required" gorm:"unique"`
-	FirstName   string  `json:"firstName"`
-	LastName    string  `json:"lastName"`
-	Description string  `json:"description"`
-	Latitude    float64 `json:"latitude"`
-	Longitude   float64 `json:"longitude"`
+	ID          uint64 `gorm:"primaryKey"`
+	UserID      uint64 `gorm:"unique"`
+	FirstName   string
+	LastName    string
+	Description string
+	Latitude    float64
+	Longitude   float64
 }
 
 type ProfilesInterface interface {
-	New(userId uint64, firstName string, lastName string, description string, latitude float64, longitude float64) Profiles
+	New() Profiles
 	Create(data Profiles) (Profiles, error)
 	FindAll() []Profiles
 	FindByUser(data Profiles) Profiles
@@ -31,8 +31,8 @@ func NewProfileModel(db *gorm.DB) *ProfilesImplementation {
 	return &ProfilesImplementation{db}
 }
 
-func (implementation *ProfilesImplementation) New(userId uint64, firstName string, lastName string, description string, latitude float64, longitude float64) Profiles {
-	return Profiles{UserID: userId, FirstName: firstName, LastName: lastName, Description: description, Latitude: latitude, Longitude: longitude}
+func (implementation *ProfilesImplementation) New() Profiles {
+	return Profiles{}
 }
 
 func (implementation *ProfilesImplementation) Create(data Profiles) (Profiles, error) {
