@@ -154,7 +154,7 @@ func (controller *ProfilesController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	if err := controller.profile.DeleteByUser(data); err != nil {
+	if err := controller.profile.Delete(data); err != nil {
 		profile := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, profile)
 		return

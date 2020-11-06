@@ -20,7 +20,7 @@ type ProfilesInterface interface {
 	FindAll() []Profiles
 	FindOne(data Profiles) Profiles
 	UpdateByUser(data Profiles) (Profiles, error)
-	DeleteByUser(data Profiles) error
+	Delete(data Profiles) error
 }
 
 type ProfilesImplementation struct {
@@ -74,7 +74,7 @@ func (implementation *ProfilesImplementation) UpdateByUser(data Profiles) (Profi
 	return data, tx.Commit().Error
 }
 
-func (implementation *ProfilesImplementation) DeleteByUser(data Profiles) error {
+func (implementation *ProfilesImplementation) Delete(data Profiles) error {
 	tx := implementation.db.Begin()
 
 	if err := tx.Where(data).Delete(data).Error; err != nil {
