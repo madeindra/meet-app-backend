@@ -12,12 +12,13 @@ import (
 type CredentialController struct {
 	credential models.CredentialInterface
 	token      models.TokenInterface
+	profile    models.ProfilesInterface
 	hash       helpers.HashInterface
 	bearer     helpers.JWTInterface
 }
 
-func NewCredentialController(credential models.CredentialInterface, token models.TokenInterface, hash helpers.HashInterface, bearer helpers.JWTInterface) *CredentialController {
-	return &CredentialController{credential, token, hash, bearer}
+func NewCredentialController(credential models.CredentialInterface, token models.TokenInterface, profile models.ProfilesInterface, hash helpers.HashInterface, bearer helpers.JWTInterface) *CredentialController {
+	return &CredentialController{credential, token, profile, hash, bearer}
 }
 
 func (controller *CredentialController) Register(ctx *gin.Context) {
@@ -49,6 +50,16 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 	data.Password = hash
 
 	credential, err := controller.credential.Create(data)
+	if err != nil {
+		res := entities.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	userProfile := controller.profile.New()
+	userProfile.UserID = credential.ID
+
+	_, err = controller.profile.Create(userProfile)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
