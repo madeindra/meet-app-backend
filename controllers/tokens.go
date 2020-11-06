@@ -46,7 +46,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 	tokenData := controller.token.New()
 	tokenData.UserID = userData.ID
 	tokenData.RefreshToken = data.RefreshToken
-	token := controller.token.FindByUser(tokenData)
+	token := controller.token.FindOne(tokenData)
 	if token.ID == 0 {
 		res := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, res)
@@ -68,7 +68,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 	}
 
 	token.RefreshToken = refreshToken
-	if _, err := controller.token.Update(token); err != nil {
+	if _, err := controller.token.UpdateByUser(token); err != nil {
 		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return

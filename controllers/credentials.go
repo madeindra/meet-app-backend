@@ -100,9 +100,18 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 
 	refreshTokenData := controller.token.New()
 	refreshTokenData.UserID = credential.ID
+	exist := controller.token.FindOne(refreshTokenData)
+
 	refreshTokenData.RefreshToken = refreshToken
-	if _, err := controller.token.Update(refreshTokenData); err != nil {
+
+	if exist.ID == 0 {
 		if _, err := controller.token.Create(refreshTokenData); err != nil {
+			res := entities.InterenalServerErrorResponse()
+			ctx.JSON(http.StatusInternalServerError, res)
+			return
+		}
+	} else {
+		if _, err := controller.token.UpdateByUser(refreshTokenData); err != nil {
 			res := entities.InterenalServerErrorResponse()
 			ctx.JSON(http.StatusInternalServerError, res)
 			return
