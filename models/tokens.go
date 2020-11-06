@@ -13,7 +13,7 @@ type tokens struct {
 }
 
 type TokenInterface interface {
-	New(userID uint64, refreshToken string) tokens
+	New() tokens
 	Create(data tokens) (tokens, error)
 	FindByUser(data tokens) tokens
 	Update(data tokens) (tokens, error)
@@ -27,8 +27,8 @@ func NewTokenModel(db *gorm.DB) *TokenImplementation {
 	return &TokenImplementation{db}
 }
 
-func (implementation *TokenImplementation) New(userID uint64, refreshToken string) tokens {
-	return tokens{UserID: userID, RefreshToken: refreshToken}
+func (implementation *TokenImplementation) New() tokens {
+	return tokens{}
 }
 
 func (implementation *TokenImplementation) Create(data tokens) (tokens, error) {
