@@ -10,11 +10,12 @@ import (
 )
 
 type ProfilesController struct {
-	profile models.ProfilesInterface
+	profile    models.ProfilesInterface
+	credential models.CredentialInterface
 }
 
-func NewProfileController(profile models.ProfilesInterface) *ProfilesController {
-	return &ProfilesController{profile}
+func NewProfileController(profile models.ProfilesInterface, credential models.CredentialInterface) *ProfilesController {
+	return &ProfilesController{profile, credential}
 }
 
 func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
@@ -61,10 +62,19 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 		return
 	}
 
-	checkExisting := controller.profile.New()
-	checkExisting.UserID = req.UserID
+	userExist := controller.credential.New()
+	userExist.ID = req.UserID
+	exist := controller.credential.FindOne(userExist)
+	if exist.ID == 0 {
+		res := entities.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
+		return
+	}
 
-	duplicate := controller.profile.FindOne(checkExisting)
+	profileExist := controller.profile.New()
+	profileExist.UserID = req.UserID
+
+	duplicate := controller.profile.FindOne(profileExist)
 	if duplicate.ID != 0 {
 		res := entities.ConflictResponse()
 		ctx.JSON(http.StatusConflict, res)

@@ -39,7 +39,7 @@ func RouterInit() *gin.Engine {
 	pingController := controllers.NewPingController()
 	credentialController := controllers.NewCredentialController(credentialModel, tokenModel, hashHelper, bearerHelper)
 	tokenController := controllers.NewTokenController(tokenModel, credentialModel, bearerHelper)
-	profileController := controllers.NewProfileController(profileModel)
+	profileController := controllers.NewProfileController(profileModel, credentialModel)
 
 	router.GET(rootPath, pingController.Ping)
 
