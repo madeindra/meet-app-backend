@@ -54,7 +54,7 @@ func (controller *ProfilesController) GetCollections(ctx *gin.Context) {
 }
 
 func (controller *ProfilesController) Post(ctx *gin.Context) {
-	req := entities.NewProfileData()
+	req := entities.NewProfileRequest()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
@@ -109,7 +109,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 		return
 	}
 
-	req := entities.NewProfileData()
+	req := entities.NewProfileRequest()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		profile := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, profile)
