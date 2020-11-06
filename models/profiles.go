@@ -18,7 +18,7 @@ type ProfilesInterface interface {
 	New() Profiles
 	Create(data Profiles) (Profiles, error)
 	FindAll() []Profiles
-	FindByUser(data Profiles) Profiles
+	FindOne(data Profiles) Profiles
 	UpdateByUser(data Profiles) (Profiles, error)
 	DeleteByUser(data Profiles) error
 }
@@ -54,7 +54,7 @@ func (implementation *ProfilesImplementation) FindAll() []Profiles {
 	return res
 }
 
-func (implementation *ProfilesImplementation) FindByUser(data Profiles) Profiles {
+func (implementation *ProfilesImplementation) FindOne(data Profiles) Profiles {
 	res := Profiles{}
 
 	implementation.db.Where(data).First(&res)
