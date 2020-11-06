@@ -1,8 +1,6 @@
 package models
 
 import (
-	"errors"
-
 	"github.com/jinzhu/gorm"
 )
 
@@ -15,8 +13,8 @@ type tokens struct {
 type TokenInterface interface {
 	New() tokens
 	Create(data tokens) (tokens, error)
-	FindByUser(data tokens) tokens
-	Update(data tokens) (tokens, error)
+	FindOne(data tokens) tokens
+	UpdateByUser(data tokens) (tokens, error)
 }
 
 type TokenImplementation struct {
@@ -42,27 +40,22 @@ func (implementation *TokenImplementation) Create(data tokens) (tokens, error) {
 	return data, tx.Commit().Error
 }
 
-func (implementation *TokenImplementation) FindByUser(data tokens) tokens {
-	tx := implementation.db
+func (implementation *TokenImplementation) FindOne(data tokens) tokens {
 	res := tokens{}
 
-	tx.Where(data).First(&res)
+	implementation.db.Where(data).First(&res)
 
 	return res
 }
 
-func (implementation *TokenImplementation) Update(data tokens) (tokens, error) {
+func (implementation *TokenImplementation) UpdateByUser(data tokens) (tokens, error) {
 	tx := implementation.db.Begin()
-	res := tokens{}
+	res := tokens{UserID: data.UserID}
 
-	if err := tx.First(&res, data.ID).Updates(data).Error; err != nil {
+	if err := tx.Model(tokens{}).Where(res).Updates(&data).Error; err != nil {
 		tx.Rollback()
 		return tokens{}, err
 	}
 
-	if res.ID == 0 {
-		return tokens{}, errors.New("Not found")
-	}
-
-	return res, tx.Commit().Error
+	return data, tx.Commit().Error
 }
