@@ -20,7 +20,7 @@ func NewTokenController(token models.TokenInterface, credential models.Credentia
 }
 
 func (controller *TokenController) Refresh(ctx *gin.Context) {
-	data := controller.token.New()
+	data := entities.NewTokenRequest()
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
