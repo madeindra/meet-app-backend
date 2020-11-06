@@ -21,30 +21,32 @@ func NewCredentialController(credential models.CredentialInterface, token models
 }
 
 func (controller *CredentialController) Register(ctx *gin.Context) {
-	data := controller.credential.New()
-	if err := ctx.ShouldBindJSON(&data); err != nil {
+	req := entities.NewCredentialRequest()
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	hash, err := controller.hash.Generate(data.Password)
-	if err != nil {
-		res := entities.InterenalServerErrorResponse()
-		ctx.JSON(http.StatusInternalServerError, res)
-		return
-	}
-
-	data.Password = hash
-
 	user := controller.credential.New()
-	user.Email = data.Email
+	user.Email = req.Email
 	duplicate := controller.credential.FindOne(user)
 	if duplicate.ID != 0 {
 		res := entities.ConflictResponse()
 		ctx.JSON(http.StatusConflict, res)
 		return
 	}
+
+	hash, err := controller.hash.Generate(req.Password)
+	if err != nil {
+		res := entities.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	data := controller.credential.New()
+	data.Email = req.Email
+	data.Password = hash
 
 	credential, err := controller.credential.Create(data)
 	if err != nil {
@@ -59,15 +61,15 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 }
 
 func (controller *CredentialController) Login(ctx *gin.Context) {
-	data := controller.credential.New()
-	if err := ctx.ShouldBindJSON(&data); err != nil {
+	req := entities.NewCredentialRequest()
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	user := controller.credential.New()
-	user.Email = data.Email
+	user.Email = req.Email
 	credential := controller.credential.FindOne(user)
 	if credential.ID == 0 {
 		res := entities.UnauthorizedResponse()
@@ -75,7 +77,7 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
-	err := controller.hash.Verify(credential.Password, data.Password)
+	err := controller.hash.Verify(credential.Password, req.Password)
 	if err != nil {
 		res := entities.UnauthorizedResponse()
 		ctx.JSON(http.StatusUnauthorized, res)
