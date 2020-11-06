@@ -3,9 +3,9 @@ package models
 import "github.com/jinzhu/gorm"
 
 type credentials struct {
-	ID       uint64 `json:"id" gorm:"primaryKey"`
-	Email    string `json:"email" gorm:"unique" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	ID       uint64 `gorm:"primaryKey"`
+	Email    string `gorm:"unique"`
+	Password string
 }
 
 type CredentialInterface interface {

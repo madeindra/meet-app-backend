@@ -7,9 +7,9 @@ import (
 )
 
 type tokens struct {
-	ID           uint64 `json:"id" gorm:"primaryKey"`
-	UserID       uint64 `json:"userId" gorm:"unique"`
-	RefreshToken string `json:"refreshToken" binding:"required"`
+	ID           uint64 `gorm:"primaryKey"`
+	UserID       uint64 `gorm:"unique"`
+	RefreshToken string
 }
 
 type TokenInterface interface {
