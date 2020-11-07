@@ -6,6 +6,7 @@ const (
 	notFoundMessage             = "Not Found"
 	unauthorizedMessage         = "Unauthorized"
 	conflictMessage             = "Conflict"
+	unprocessableEntityMessage  = "Unprocessable Entity"
 )
 
 type failed struct {
@@ -35,4 +36,8 @@ func InterenalServerErrorResponse() failed {
 
 func ConflictResponse() failed {
 	return failedResponse(conflictMessage)
+}
+
+func UnprocessableEntityResponse() failed {
+	return failedResponse(unprocessableEntityMessage)
 }
