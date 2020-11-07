@@ -31,8 +31,7 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 
 	user := controller.credential.New()
 	user.Email = req.Email
-	duplicate := controller.credential.FindOne(user)
-	if duplicate.ID != 0 {
+	if duplicate := controller.credential.FindOne(user); duplicate.ID != 0 {
 		res := entities.ConflictResponse()
 		ctx.JSON(http.StatusConflict, res)
 		return
