@@ -42,7 +42,40 @@ func (controller *MatchController) GetSingle(ctx *gin.Context) {
 }
 
 func (controller *MatchController) GetCollections(ctx *gin.Context) {
-	match := controller.match.FindAll()
+	userID, err := strconv.ParseUint(ctx.DefaultQuery("userId", "0"), 10, 64)
+	if err != nil {
+		match := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, match)
+		return
+	}
+
+	userMatch, err := strconv.ParseUint(ctx.DefaultQuery("matchTo", "0"), 10, 64)
+	if err != nil {
+		match := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, match)
+		return
+	}
+
+	var boolSensitive bool = false
+	var liked bool = false
+
+	if ctx.Query("liked") != "" {
+		liked, err = strconv.ParseBool(ctx.Query("liked"))
+		if err != nil {
+			match := entities.BadRequestResponse()
+			ctx.JSON(http.StatusBadRequest, match)
+			return
+		}
+
+		boolSensitive = true
+	}
+
+	data := controller.match.New()
+	data.UserID = userID
+	data.UserMatch = userMatch
+	data.Liked = liked
+
+	match := controller.match.FindBy(data, boolSensitive)
 	if len(match) == 0 {
 		match := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, match)
