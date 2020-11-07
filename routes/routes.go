@@ -21,6 +21,8 @@ const (
 	loginPath        string = "/login"
 	profilePath      string = "/profiles"
 	profileIDPath    string = "/profiles/:id"
+	matchPath        string = "/matches"
+	matchIDPath      string = "/matches/:id"
 )
 
 func RouterInit() *gin.Engine {
@@ -35,11 +37,13 @@ func RouterInit() *gin.Engine {
 	credentialModel := models.NewCredentialModel(db)
 	tokenModel := models.NewTokenModel(db)
 	profileModel := models.NewProfileModel(db)
+	matchModel := models.NewMatchModel(db)
 
 	pingController := controllers.NewPingController()
 	credentialController := controllers.NewCredentialController(credentialModel, tokenModel, profileModel, hashHelper, bearerHelper)
 	tokenController := controllers.NewTokenController(tokenModel, credentialModel, bearerHelper)
 	profileController := controllers.NewProfileController(profileModel, credentialModel)
+	matchController := controllers.NewMatchController(matchModel, credentialModel)
 
 	router.GET(rootPath, pingController.Ping)
 
@@ -59,5 +63,11 @@ func RouterInit() *gin.Engine {
 	v1.DELETE(profileIDPath, profileController.Delete)
 	v1.GET(profilePath, profileController.GetCollections)
 	v1.POST(profilePath, profileController.Post)
+
+	v1.GET(matchIDPath, matchController.GetSingle)
+	v1.PUT(matchIDPath, matchController.Put)
+	v1.DELETE(matchIDPath, matchController.Delete)
+	v1.GET(matchPath, matchController.GetCollections)
+	v1.POST(matchPath, matchController.Post)
 	return router
 }
