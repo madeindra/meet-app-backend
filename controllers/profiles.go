@@ -64,8 +64,8 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 
 	userExist := controller.credential.New()
 	userExist.ID = req.UserID
-	exist := controller.credential.FindOne(userExist)
-	if exist.ID == 0 {
+
+	if exist := controller.credential.FindOne(userExist); exist.ID == 0 {
 		res := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, res)
 		return
@@ -74,8 +74,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 	profileExist := controller.profile.New()
 	profileExist.UserID = req.UserID
 
-	duplicate := controller.profile.FindOne(profileExist)
-	if duplicate.ID != 0 {
+	if duplicate := controller.profile.FindOne(profileExist); duplicate.ID != 0 {
 		res := entities.ConflictResponse()
 		ctx.JSON(http.StatusConflict, res)
 		return
@@ -112,8 +111,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 	checkExisting := controller.profile.New()
 	checkExisting.UserID = id
 
-	exist := controller.profile.FindOne(checkExisting)
-	if exist.ID == 0 {
+	if exist := controller.profile.FindOne(checkExisting); exist.ID == 0 {
 		profile := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, profile)
 		return
@@ -157,8 +155,7 @@ func (controller *ProfilesController) Delete(ctx *gin.Context) {
 	data := controller.profile.New()
 	data.UserID = id
 
-	profile := controller.profile.FindOne(data)
-	if profile.ID == 0 {
+	if profile := controller.profile.FindOne(data); profile.ID == 0 {
 		profile := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, profile)
 		return
