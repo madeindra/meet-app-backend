@@ -12,7 +12,7 @@ type Matches struct {
 type MatchInterface interface {
 	New() Matches
 	Create(data Matches) (Matches, error)
-	FindAll() []Matches
+	FindBy(data Matches, boolSensitive bool) []Matches
 	FindOne(data Matches) Matches
 	UpdateByID(data Matches) (Matches, error)
 	Delete(data Matches) error
@@ -41,10 +41,14 @@ func (implementation *MatchImplementation) Create(data Matches) (Matches, error)
 	return data, tx.Commit().Error
 }
 
-func (implementation *MatchImplementation) FindAll() []Matches {
+func (implementation *MatchImplementation) FindBy(data Matches, boolSensitive bool) []Matches {
 	res := []Matches{}
 
-	implementation.db.Find(&res)
+	if boolSensitive {
+		implementation.db.Where(data).Where(map[string]interface{}{"liked": data.Liked}).Find(&res)
+	} else {
+		implementation.db.Where(data).Find(&res)
+	}
 
 	return res
 }
