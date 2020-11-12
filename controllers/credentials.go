@@ -120,12 +120,12 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, res)
 			return
 		}
-	} else {
-		if _, err := controller.token.UpdateByUser(refreshTokenData); err != nil {
-			res := entities.InterenalServerErrorResponse()
-			ctx.JSON(http.StatusInternalServerError, res)
-			return
-		}
+	}
+
+	if _, err := controller.token.UpdateByUser(refreshTokenData); err != nil {
+		res := entities.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
+		return
 	}
 
 	res := entities.NewAuthenticatedResponse(credential.ID, credential.Email, token, refreshToken)

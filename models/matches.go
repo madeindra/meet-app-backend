@@ -46,10 +46,10 @@ func (implementation *MatchImplementation) FindBy(data Matches, boolSensitive bo
 
 	if boolSensitive {
 		implementation.db.Where(data).Where(map[string]interface{}{"liked": data.Liked}).Find(&res)
-	} else {
-		implementation.db.Where(data).Find(&res)
+		return res
 	}
 
+	implementation.db.Where(data).Find(&res)
 	return res
 }
 func (implementation *MatchImplementation) FindOne(data Matches) Matches {
