@@ -110,17 +110,16 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 
 	refreshTokenData := controller.token.New()
 	refreshTokenData.UserID = credential.ID
-	exist := controller.token.FindOne(refreshTokenData)
 
-	refreshTokenData.RefreshToken = refreshToken
-
-	if exist.ID == 0 {
+	if exist := controller.token.FindOne(refreshTokenData); exist.ID == 0 {
 		if _, err := controller.token.Create(refreshTokenData); err != nil {
 			res := entities.InterenalServerErrorResponse()
 			ctx.JSON(http.StatusInternalServerError, res)
 			return
 		}
 	}
+
+	refreshTokenData.RefreshToken = refreshToken
 
 	if _, err := controller.token.UpdateByUser(refreshTokenData); err != nil {
 		res := entities.InterenalServerErrorResponse()
