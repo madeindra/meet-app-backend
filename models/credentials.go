@@ -12,6 +12,7 @@ type CredentialInterface interface {
 	New() credentials
 	Create(data credentials) (credentials, error)
 	FindOne(data credentials) credentials
+	UpdateByID(data credentials) (credentials, error)
 }
 
 type CredentialImplementation struct {
@@ -43,4 +44,16 @@ func (implementation *CredentialImplementation) FindOne(data credentials) creden
 	implementation.db.Where(data).First(&res)
 
 	return res
+}
+
+func (implementation *CredentialImplementation) UpdateByID(data credentials) (credentials, error) {
+	tx := implementation.db.Begin()
+	res := credentials{ID: data.ID}
+
+	if err := tx.Model(credentials{}).Where(res).Updates(&data).Error; err != nil {
+		tx.Rollback()
+		return credentials{}, err
+	}
+
+	return data, tx.Commit().Error
 }
