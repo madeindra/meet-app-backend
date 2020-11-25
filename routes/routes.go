@@ -19,6 +19,8 @@ const (
 	registerPath     string = "/registration"
 	tokenPath        string = "/token"
 	loginPath        string = "/login"
+	resetPath        string = "/reset"
+	resetIDPath      string = "/reset/:id"
 	profilePath      string = "/profiles"
 	profileIDPath    string = "/profiles/:id"
 	matchPath        string = "/matches"
@@ -36,11 +38,13 @@ func RouterInit() *gin.Engine {
 
 	credentialModel := models.NewCredentialModel(db)
 	tokenModel := models.NewTokenModel(db)
+	resetModel := models.NewResetModel(db)
 	profileModel := models.NewProfileModel(db)
 	matchModel := models.NewMatchModel(db)
 
 	pingController := controllers.NewPingController()
 	credentialController := controllers.NewCredentialController(credentialModel, tokenModel, profileModel, hashHelper, bearerHelper)
+	resetController := controllers.NewResetController(resetModel, credentialModel)
 	tokenController := controllers.NewTokenController(tokenModel, credentialModel, bearerHelper)
 	profileController := controllers.NewProfileController(profileModel, credentialModel)
 	matchController := controllers.NewMatchController(matchModel, credentialModel)
@@ -55,6 +59,8 @@ func RouterInit() *gin.Engine {
 	auth.POST(registerPath, credentialController.Register)
 	auth.POST(loginPath, credentialController.Login)
 	auth.POST(tokenPath, tokenController.Refresh)
+	auth.POST(resetPath, resetController.Start)
+	auth.PUT(resetIDPath, resetController.Complete)
 
 	v1.Use(middlewares.Jwt())
 
