@@ -5,7 +5,7 @@ type resetStartRequest struct {
 }
 
 type resetCompleteRequest struct {
-	Password string `json:"passwoord" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type resetStartResponse struct {
