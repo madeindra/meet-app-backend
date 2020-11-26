@@ -45,7 +45,7 @@ func RouterInit() *gin.Engine {
 
 	pingController := controllers.NewPingController()
 	credentialController := controllers.NewCredentialController(credentialModel, tokenModel, profileModel, hashHelper, bearerHelper)
-	resetController := controllers.NewResetController(resetModel, credentialModel)
+	resetController := controllers.NewResetController(resetModel, credentialModel, hashHelper)
 	tokenController := controllers.NewTokenController(tokenModel, credentialModel, bearerHelper)
 	profileController := controllers.NewProfileController(profileModel, credentialModel)
 	matchController := controllers.NewMatchController(matchModel, credentialModel)
