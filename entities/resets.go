@@ -22,7 +22,7 @@ type resetCompleteResponse struct {
 
 type resetStartData struct {
 	UserID uint64 `json:"userId"`
-	Token  string `jsoon:"token"`
+	Token  string `json:"token"`
 }
 
 type resetCompleteData struct {
