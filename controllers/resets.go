@@ -6,16 +6,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/madeindra/meet-app/entities"
+	"github.com/madeindra/meet-app/helpers"
 	"github.com/madeindra/meet-app/models"
 )
 
 type ResetController struct {
 	reset      models.ResetInterface
 	credential models.CredentialInterface
+	hash       helpers.HashInterface
 }
 
-func NewResetController(reset models.ResetInterface, credential models.CredentialInterface) *ResetController {
-	return &ResetController{reset, credential}
+func NewResetController(reset models.ResetInterface, credential models.CredentialInterface, hash helpers.HashInterface) *ResetController {
+	return &ResetController{reset, credential, hash}
 }
 
 func (controller *ResetController) Start(ctx *gin.Context) {
@@ -112,8 +114,16 @@ func (controller *ResetController) Complete(ctx *gin.Context) {
 		return
 	}
 
+	//create hash
+	hash, err := controller.hash.Generate(data.Password)
+	if err != nil {
+		res := entities.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
 	// Update password
-	credential.Password = data.Password
+	credential.Password = hash
 	if _, err := controller.credential.UpdateByID(credential); err != nil {
 		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
