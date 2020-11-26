@@ -17,6 +17,7 @@ const (
 
 	authenticatePath string = "/authentication"
 	registerPath     string = "/registration"
+	credentialIDPath string = "/credential/:id"
 	tokenPath        string = "/token"
 	loginPath        string = "/login"
 	resetPath        string = "/reset"
@@ -64,6 +65,7 @@ func RouterInit() *gin.Engine {
 
 	v1.Use(middlewares.Jwt())
 
+	v1.PUT(credentialIDPath, credentialController.Update)
 	v1.GET(profileIDPath, profileController.GetSingle)
 	v1.PUT(profileIDPath, profileController.Put)
 	v1.DELETE(profileIDPath, profileController.Delete)
