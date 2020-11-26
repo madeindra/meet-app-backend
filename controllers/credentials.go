@@ -152,36 +152,36 @@ func (controller *CredentialController) Update(ctx *gin.Context) {
 	}
 
 	// Bind Data
-	data := entities.NewCredentialUpdateRequest()
-	if err := ctx.ShouldBindJSON(&data); err != nil {
+	req := entities.NewCredentialUpdateRequest()
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	// Find ID & Email in database
-	credential := controller.credential.New()
-	credential.ID = id
-	credential.Email = fmt.Sprintf("%v", email)
+	data := controller.credential.New()
+	data.ID = id
+	data.Email = fmt.Sprintf("%v", email)
 
-	exist := controller.credential.FindOne(credential)
-	if exist.Password == "" {
+	credential := controller.credential.FindOne(data)
+	if credential.Password == "" {
 		res := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
 	// Only if user want to update password
-	if data.OldPassword != "" && data.NewPassword != "" {
+	if req.OldPassword != "" && req.NewPassword != "" {
 		// Match old password
-		if err := controller.hash.Verify(exist.Password, data.OldPassword); err != nil {
+		if err := controller.hash.Verify(credential.Password, req.OldPassword); err != nil {
 			res := entities.UnauthorizedResponse()
 			ctx.JSON(http.StatusUnauthorized, res)
 			return
 		}
 
 		// create hash of new pass
-		hash, err := controller.hash.Generate(data.NewPassword)
+		hash, err := controller.hash.Generate(req.NewPassword)
 		if err != nil {
 			res := entities.InterenalServerErrorResponse()
 			ctx.JSON(http.StatusInternalServerError, res)
@@ -189,22 +189,22 @@ func (controller *CredentialController) Update(ctx *gin.Context) {
 		}
 
 		// Update password
-		credential.Password = hash
+		data.Password = hash
 	}
 
 	// Only if user want to update email
-	if data.Email != "" {
-		credential.Email = data.Email
+	if req.Email != "" {
+		data.Email = req.Email
 	}
 
-	_, err = controller.credential.UpdateByID(credential)
+	_, err = controller.credential.UpdateByID(data)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := entities.NewCredentialUpdateResponse(credential.ID, credential.Email)
+	res := entities.NewCredentialUpdateResponse(data.ID, data.Email)
 	ctx.JSON(http.StatusOK, res)
 	return
 }

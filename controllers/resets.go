@@ -25,8 +25,8 @@ func NewResetController(reset models.ResetInterface, credential models.Credentia
 
 func (controller *ResetController) Start(ctx *gin.Context) {
 	// Bind Request
-	data := entities.NewResetStartRequest()
-	if err := ctx.ShouldBindJSON(&data); err != nil {
+	req := entities.NewResetStartRequest()
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
@@ -34,7 +34,7 @@ func (controller *ResetController) Start(ctx *gin.Context) {
 
 	// Check User Exist
 	credential := controller.credential.New()
-	credential.Email = data.Email
+	credential.Email = req.Email
 
 	exist := controller.credential.FindOne(credential)
 	if exist.ID == 0 {
@@ -44,12 +44,12 @@ func (controller *ResetController) Start(ctx *gin.Context) {
 	}
 
 	// Check reset request on table exist / not
-	resetData := controller.reset.New()
-	resetData.UserID = exist.ID
+	data := controller.reset.New()
+	data.UserID = exist.ID
 
 	// insert if not exist
-	if exist := controller.reset.FindOne(resetData); exist.ID == 0 {
-		if _, err := controller.reset.Create(resetData); err != nil {
+	if exist := controller.reset.FindOne(data); exist.ID == 0 {
+		if _, err := controller.reset.Create(data); err != nil {
 			res := entities.InterenalServerErrorResponse()
 			ctx.JSON(http.StatusInternalServerError, res)
 			return
@@ -57,16 +57,15 @@ func (controller *ResetController) Start(ctx *gin.Context) {
 	}
 
 	// update token in table
-	//TODO: create helper for this
-	resetData.Token = controller.random.RandomString(tokenLength)
+	data.Token = controller.random.RandomString(tokenLength)
 
-	if _, err := controller.reset.UpdateByUser(resetData); err != nil {
+	if _, err := controller.reset.UpdateByUser(data); err != nil {
 		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := entities.NewResetStartResponse(resetData.UserID, resetData.Token)
+	res := entities.NewResetStartResponse(data.UserID, data.Token)
 	ctx.JSON(http.StatusOK, res)
 	return
 }

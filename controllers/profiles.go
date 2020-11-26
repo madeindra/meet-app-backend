@@ -21,8 +21,8 @@ func NewProfileController(profile models.ProfilesInterface, credential models.Cr
 func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		profile := entities.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, profile)
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -31,8 +31,8 @@ func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 
 	profile := controller.profile.FindOne(data)
 	if profile.ID == 0 {
-		profile := entities.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, profile)
+		res := entities.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
@@ -44,8 +44,8 @@ func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 func (controller *ProfilesController) GetCollections(ctx *gin.Context) {
 	profile := controller.profile.FindAll()
 	if len(profile) == 0 {
-		profile := entities.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, profile)
+		res := entities.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
@@ -103,8 +103,8 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 func (controller *ProfilesController) Put(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		profile := entities.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, profile)
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -112,15 +112,15 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 	checkExisting.UserID = id
 
 	if exist := controller.profile.FindOne(checkExisting); exist.ID == 0 {
-		profile := entities.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, profile)
+		res := entities.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
 	req := entities.NewProfileRequest()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		profile := entities.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, profile)
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -147,8 +147,8 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 func (controller *ProfilesController) Delete(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		profile := entities.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, profile)
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -156,14 +156,14 @@ func (controller *ProfilesController) Delete(ctx *gin.Context) {
 	data.UserID = id
 
 	if profile := controller.profile.FindOne(data); profile.ID == 0 {
-		profile := entities.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, profile)
+		res := entities.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
 	if err := controller.profile.Delete(data); err != nil {
-		profile := entities.InterenalServerErrorResponse()
-		ctx.JSON(http.StatusInternalServerError, profile)
+		res := entities.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 

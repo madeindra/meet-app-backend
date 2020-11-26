@@ -20,14 +20,14 @@ func NewTokenController(token models.TokenInterface, credential models.Credentia
 }
 
 func (controller *TokenController) Refresh(ctx *gin.Context) {
-	data := entities.NewTokenRequest()
-	if err := ctx.ShouldBindJSON(&data); err != nil {
+	req := entities.NewTokenRequest()
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	email, err := controller.bearer.ParseRefresh(data.RefreshToken)
+	email, err := controller.bearer.ParseRefresh(req.RefreshToken)
 	if err != nil {
 		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
@@ -43,11 +43,11 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	tokenData := controller.token.New()
-	tokenData.UserID = userData.ID
-	tokenData.RefreshToken = data.RefreshToken
-	token := controller.token.FindOne(tokenData)
-	if token.ID == 0 {
+	token := controller.token.New()
+	token.UserID = userData.ID
+	token.RefreshToken = req.RefreshToken
+	data := controller.token.FindOne(token)
+	if data.ID == 0 {
 		res := entities.NotFoundResponse()
 		ctx.JSON(http.StatusNotFound, res)
 		return
@@ -67,14 +67,14 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	token.RefreshToken = refreshToken
-	if _, err := controller.token.UpdateByUser(token); err != nil {
+	data.RefreshToken = refreshToken
+	if _, err := controller.token.UpdateByUser(data); err != nil {
 		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := entities.NewTokenResponse(authToken, token.RefreshToken)
+	res := entities.NewTokenResponse(authToken, data.RefreshToken)
 	ctx.JSON(http.StatusOK, res)
 	return
 }

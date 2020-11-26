@@ -21,8 +21,8 @@ func NewMatchController(match models.MatchInterface, credential models.Credentia
 func (controller *MatchController) GetSingle(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		match := entities.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, match)
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -31,8 +31,8 @@ func (controller *MatchController) GetSingle(ctx *gin.Context) {
 
 	match := controller.match.FindOne(data)
 	if match.ID == 0 {
-		match := entities.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, match)
+		res := entities.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
@@ -44,15 +44,15 @@ func (controller *MatchController) GetSingle(ctx *gin.Context) {
 func (controller *MatchController) GetCollections(ctx *gin.Context) {
 	userID, err := strconv.ParseUint(ctx.DefaultQuery("userId", "0"), 10, 64)
 	if err != nil {
-		match := entities.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, match)
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	userMatch, err := strconv.ParseUint(ctx.DefaultQuery("matchTo", "0"), 10, 64)
 	if err != nil {
-		match := entities.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, match)
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -62,8 +62,8 @@ func (controller *MatchController) GetCollections(ctx *gin.Context) {
 	if ctx.Query("liked") != "" {
 		liked, err = strconv.ParseBool(ctx.Query("liked"))
 		if err != nil {
-			match := entities.BadRequestResponse()
-			ctx.JSON(http.StatusBadRequest, match)
+			res := entities.BadRequestResponse()
+			ctx.JSON(http.StatusBadRequest, res)
 			return
 		}
 
@@ -77,8 +77,8 @@ func (controller *MatchController) GetCollections(ctx *gin.Context) {
 
 	match := controller.match.FindBy(data, boolSensitive)
 	if len(match) == 0 {
-		match := entities.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, match)
+		res := entities.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
@@ -146,8 +146,8 @@ func (controller *MatchController) Post(ctx *gin.Context) {
 func (controller *MatchController) Put(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		match := entities.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, match)
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -155,15 +155,15 @@ func (controller *MatchController) Put(ctx *gin.Context) {
 	checkExisting.ID = id
 
 	if exist := controller.match.FindOne(checkExisting); exist.ID == 0 {
-		match := entities.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, match)
+		res := entities.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
 	req := entities.NewMatchRequest()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		match := entities.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, match)
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -188,8 +188,8 @@ func (controller *MatchController) Put(ctx *gin.Context) {
 func (controller *MatchController) Delete(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		match := entities.BadRequestResponse()
-		ctx.JSON(http.StatusBadRequest, match)
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
@@ -198,14 +198,14 @@ func (controller *MatchController) Delete(ctx *gin.Context) {
 
 	match := controller.match.FindOne(data)
 	if match.ID == 0 {
-		match := entities.NotFoundResponse()
-		ctx.JSON(http.StatusNotFound, match)
+		res := entities.NotFoundResponse()
+		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
 	if err := controller.match.Delete(data); err != nil {
-		match := entities.InterenalServerErrorResponse()
-		ctx.JSON(http.StatusInternalServerError, match)
+		res := entities.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
