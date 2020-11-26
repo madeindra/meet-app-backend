@@ -14,10 +14,13 @@ type ResetController struct {
 	reset      models.ResetInterface
 	credential models.CredentialInterface
 	hash       helpers.HashInterface
+	random     helpers.RandomInterface
 }
 
-func NewResetController(reset models.ResetInterface, credential models.CredentialInterface, hash helpers.HashInterface) *ResetController {
-	return &ResetController{reset, credential, hash}
+const tokenLength = 64
+
+func NewResetController(reset models.ResetInterface, credential models.CredentialInterface, hash helpers.HashInterface, random helpers.RandomInterface) *ResetController {
+	return &ResetController{reset, credential, hash, random}
 }
 
 func (controller *ResetController) Start(ctx *gin.Context) {
@@ -55,7 +58,7 @@ func (controller *ResetController) Start(ctx *gin.Context) {
 
 	// update token in table
 	//TODO: create helper for this
-	resetData.Token = "createRandomToken"
+	resetData.Token = controller.random.RandomString(tokenLength)
 
 	if _, err := controller.reset.UpdateByUser(resetData); err != nil {
 		res := entities.InterenalServerErrorResponse()
