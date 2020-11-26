@@ -20,6 +20,7 @@ func NewTokenController(token models.TokenInterface, credential models.Credentia
 }
 
 func (controller *TokenController) Refresh(ctx *gin.Context) {
+	// bind request
 	req := entities.NewTokenRequest()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
@@ -27,6 +28,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
+	// get email from refresh token
 	email, err := controller.bearer.ParseRefresh(req.RefreshToken)
 	if err != nil {
 		res := entities.BadRequestResponse()
@@ -34,6 +36,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
+	// find credential by email in db
 	user := controller.credential.New()
 	user.Email = email
 	userData := controller.credential.FindOne(user)
@@ -43,6 +46,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
+	// find refresh data by user id & refresh token in db
 	token := controller.token.New()
 	token.UserID = userData.ID
 	token.RefreshToken = req.RefreshToken
@@ -53,6 +57,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
+	// generate a new jwt auth token
 	authToken, err := controller.bearer.GenerateToken(userData.Email)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
@@ -60,6 +65,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
+	// generate a new refresh token
 	refreshToken, err := controller.bearer.GenerateRefresh(userData.Email)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
@@ -67,6 +73,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
+	// update existing refresh token in db
 	data.RefreshToken = refreshToken
 	if _, err := controller.token.UpdateByUser(data); err != nil {
 		res := entities.InterenalServerErrorResponse()
@@ -74,6 +81,7 @@ func (controller *TokenController) Refresh(ctx *gin.Context) {
 		return
 	}
 
+	// return resposne
 	res := entities.NewTokenResponse(authToken, data.RefreshToken)
 	ctx.JSON(http.StatusOK, res)
 	return

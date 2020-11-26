@@ -24,6 +24,7 @@ func NewCredentialController(credential models.CredentialInterface, token models
 }
 
 func (controller *CredentialController) Register(ctx *gin.Context) {
+	// bind request
 	req := entities.NewCredentialRequest()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
@@ -31,6 +32,7 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 		return
 	}
 
+	// find existing credential by email
 	user := controller.credential.New()
 	user.Email = req.Email
 	if duplicate := controller.credential.FindOne(user); duplicate.ID != 0 {
@@ -39,6 +41,7 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 		return
 	}
 
+	// create hash from password in request
 	hash, err := controller.hash.Generate(req.Password)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
@@ -46,10 +49,12 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 		return
 	}
 
+	// create credential data to insert
 	data := controller.credential.New()
 	data.Email = req.Email
 	data.Password = hash
 
+	// insert credential data to db
 	credential, err := controller.credential.Create(data)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
@@ -57,9 +62,11 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 		return
 	}
 
+	// create profile data for that credential
 	userProfile := controller.profile.New()
 	userProfile.UserID = credential.ID
 
+	// insert profile data to db
 	_, err = controller.profile.Create(userProfile)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
@@ -67,12 +74,14 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 		return
 	}
 
+	// return response
 	res := entities.NewCredentialResponse(credential.ID, credential.Email)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
 
 func (controller *CredentialController) Login(ctx *gin.Context) {
+	// bind request
 	req := entities.NewCredentialRequest()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
@@ -80,6 +89,7 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
+	// find existing credential by email
 	user := controller.credential.New()
 	user.Email = req.Email
 	credential := controller.credential.FindOne(user)
@@ -89,6 +99,7 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
+	// verify hashed password in db to plain password in request
 	err := controller.hash.Verify(credential.Password, req.Password)
 	if err != nil {
 		res := entities.UnauthorizedResponse()
@@ -96,6 +107,7 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
+	// generate jwt bearer token
 	token, err := controller.bearer.GenerateToken(credential.Email)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
@@ -103,6 +115,7 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
+	// generate jwt refresh token
 	refreshToken, err := controller.bearer.GenerateRefresh(credential.Email)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
@@ -110,9 +123,11 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
+	// create refresh token data
 	refreshTokenData := controller.token.New()
 	refreshTokenData.UserID = credential.ID
 
+	// find existing refresh token data in db, if not exist create with user id
 	if exist := controller.token.FindOne(refreshTokenData); exist.ID == 0 {
 		if _, err := controller.token.Create(refreshTokenData); err != nil {
 			res := entities.InterenalServerErrorResponse()
@@ -121,21 +136,24 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		}
 	}
 
+	// assign refresh token to update
 	refreshTokenData.RefreshToken = refreshToken
 
+	// update refresh token in db
 	if _, err := controller.token.UpdateByUser(refreshTokenData); err != nil {
 		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
+	// return response
 	res := entities.NewAuthenticatedResponse(credential.ID, credential.Email, token, refreshToken)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
 
 func (controller *CredentialController) Update(ctx *gin.Context) {
-	// Get ID from param
+	// get ID from param
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
 		res := entities.BadRequestResponse()
@@ -143,7 +161,7 @@ func (controller *CredentialController) Update(ctx *gin.Context) {
 		return
 	}
 
-	// Get Email from jwt
+	// get email from jwt
 	email, set := ctx.Get("sub")
 	if !set {
 		res := entities.InterenalServerErrorResponse()
@@ -151,7 +169,7 @@ func (controller *CredentialController) Update(ctx *gin.Context) {
 		return
 	}
 
-	// Bind Data
+	// bind request
 	req := entities.NewCredentialUpdateRequest()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
@@ -159,7 +177,7 @@ func (controller *CredentialController) Update(ctx *gin.Context) {
 		return
 	}
 
-	// Find ID & Email in database
+	// find credential by id and email in database
 	data := controller.credential.New()
 	data.ID = id
 	data.Email = fmt.Sprintf("%v", email)
@@ -171,16 +189,15 @@ func (controller *CredentialController) Update(ctx *gin.Context) {
 		return
 	}
 
-	// Only if user want to update password
+	// if user request password update, check if the password in db match with password in request
 	if req.OldPassword != "" && req.NewPassword != "" {
-		// Match old password
 		if err := controller.hash.Verify(credential.Password, req.OldPassword); err != nil {
 			res := entities.UnauthorizedResponse()
 			ctx.JSON(http.StatusUnauthorized, res)
 			return
 		}
 
-		// create hash of new pass
+		// create hash of new password
 		hash, err := controller.hash.Generate(req.NewPassword)
 		if err != nil {
 			res := entities.InterenalServerErrorResponse()
@@ -188,15 +205,16 @@ func (controller *CredentialController) Update(ctx *gin.Context) {
 			return
 		}
 
-		// Update password
+		// assign hash to password
 		data.Password = hash
 	}
 
-	// Only if user want to update email
+	// if user request email update, assign it
 	if req.Email != "" {
 		data.Email = req.Email
 	}
 
+	// update user credential
 	_, err = controller.credential.UpdateByID(data)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
@@ -204,6 +222,7 @@ func (controller *CredentialController) Update(ctx *gin.Context) {
 		return
 	}
 
+	// return response
 	res := entities.NewCredentialUpdateResponse(data.ID, data.Email)
 	ctx.JSON(http.StatusOK, res)
 	return
