@@ -174,7 +174,7 @@ func (controller *CredentialController) Update(ctx *gin.Context) {
 	// Only if user want to update password
 	if data.OldPassword != "" && data.NewPassword != "" {
 		// Match old password
-		if err := controller.hash.Verify(data.OldPassword, exist.Password); err != nil {
+		if err := controller.hash.Verify(exist.Password, data.OldPassword); err != nil {
 			res := entities.UnauthorizedResponse()
 			ctx.JSON(http.StatusUnauthorized, res)
 			return
@@ -204,7 +204,7 @@ func (controller *CredentialController) Update(ctx *gin.Context) {
 		return
 	}
 
-	res := entities.NewCredentialUpdateResponse(credential.ID, credential.Password)
+	res := entities.NewCredentialUpdateResponse(credential.ID, credential.Email)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
