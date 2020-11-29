@@ -30,13 +30,21 @@ func (ps *pubSub) addClient(client client) *pubSub {
 func (ps *pubSub) removeClient(client client) *pubSub {
 	for index, sub := range ps.Subscriptions {
 		if client.ID == sub.Client.ID {
-			ps.Subscriptions = append(ps.Subscriptions[:index], ps.Subscriptions[index+1:]...)
+			if index == len(ps.Subscriptions) {
+				ps.Subscriptions = ps.Subscriptions[:len(ps.Subscriptions)-1]
+			} else {
+				ps.Subscriptions = append(ps.Subscriptions[:index], ps.Subscriptions[index+1:]...)
+			}
 		}
 	}
 
 	for index, c := range ps.Clients {
 		if c.ID == client.ID {
-			ps.Clients = append(ps.Clients[:index], ps.Clients[index+1:]...)
+			if index == len(ps.Clients) {
+				ps.Clients = ps.Clients[:len(ps.Clients)-1]
+			} else {
+				ps.Clients = append(ps.Clients[:index], ps.Clients[index+1:]...)
+			}
 		}
 	}
 
@@ -84,7 +92,11 @@ func (ps *pubSub) publish(topic string, message []byte, excludeClient *client) {
 func (ps *pubSub) unsubscribe(client *client, topic string) *pubSub {
 	for index, sub := range ps.Subscriptions {
 		if sub.Client.ID == client.ID && sub.Topic == topic {
-			ps.Subscriptions = append(ps.Subscriptions[:index], ps.Subscriptions[index+1:]...)
+			if index == len(ps.Subscriptions) {
+				ps.Subscriptions = ps.Subscriptions[:len(ps.Subscriptions)-1]
+			} else {
+				ps.Subscriptions = append(ps.Subscriptions[:index], ps.Subscriptions[index+1:]...)
+			}
 		}
 	}
 
