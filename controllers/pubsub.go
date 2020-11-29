@@ -1,4 +1,4 @@
-package pubsub
+package controllers
 
 import (
 	"log"
@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/madeindra/meet-app/models"
 )
 
 var upgrader = websocket.Upgrader{
@@ -18,7 +19,7 @@ func autoID() string {
 	return uuid.Must(uuid.NewRandom()).String()
 }
 
-var ps = newPubSub()
+var ps = models.NewPubSub()
 
 func WebsocketHandler(c *gin.Context) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
@@ -31,15 +32,15 @@ func WebsocketHandler(c *gin.Context) {
 		return
 	}
 
-	client := newClient(autoID(), conn)
-	ps.addClient(client)
+	client := models.NewClient(autoID(), conn)
+	ps.AddClient(client)
 
 	for {
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {
-			ps.removeClient(client)
+			ps.RemoveClient(client)
 			return
 		}
-		ps.handleReceiveMessage(client, messageType, p)
+		ps.HandleReceiveMessage(client, messageType, p)
 	}
 }

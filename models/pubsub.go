@@ -1,7 +1,9 @@
-package pubsub
+package models
 
 import (
 	"encoding/json"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -15,19 +17,53 @@ type pubSub struct {
 	Subscriptions []subscription
 }
 
-func newPubSub() *pubSub {
+type client struct {
+	ID         string
+	Connection *websocket.Conn
+}
+
+type subscription struct {
+	Topic  string
+	Client *client
+}
+
+type message struct {
+	Action  string          `json:"action"`
+	Topic   string          `json:"topic"`
+	Message json.RawMessage `json:"message"`
+}
+
+func NewPubSub() *pubSub {
 	return &pubSub{
 		Clients:       make([]client, 0),
 		Subscriptions: make([]subscription, 0),
 	}
 }
 
-func (ps *pubSub) addClient(client client) *pubSub {
+func NewClient(id string, conn *websocket.Conn) client {
+	return client{
+		ID:         id,
+		Connection: conn,
+	}
+}
+
+func newSubscription(topic string, client *client) subscription {
+	return subscription{
+		Topic:  topic,
+		Client: client,
+	}
+}
+
+func newMessage() *message {
+	return &message{}
+}
+
+func (ps *pubSub) AddClient(client client) *pubSub {
 	ps.Clients = append(ps.Clients, client)
 	return ps
 }
 
-func (ps *pubSub) removeClient(client client) *pubSub {
+func (ps *pubSub) RemoveClient(client client) *pubSub {
 	for index, sub := range ps.Subscriptions {
 		if client.ID == sub.Client.ID {
 			if index == len(ps.Subscriptions) {
@@ -49,6 +85,37 @@ func (ps *pubSub) removeClient(client client) *pubSub {
 	}
 
 	return ps
+}
+
+func (ps *pubSub) HandleReceiveMessage(client client, messageType int, payload []byte) *pubSub {
+	m := newMessage()
+
+	if err := json.Unmarshal(payload, &m); err != nil {
+		return ps
+	}
+
+	switch m.Action {
+	case publish:
+		ps.publish(m.Topic, m.Message, nil)
+		break
+
+	case subscribe:
+		ps.subscribe(&client, m.Topic)
+		break
+
+	case unsubscribe:
+		ps.unsubscribe(&client, m.Topic)
+		break
+
+	default:
+		break
+	}
+
+	return ps
+}
+
+func (client *client) send(message []byte) error {
+	return client.Connection.WriteMessage(1, message)
 }
 
 func (ps *pubSub) getSubscriptions(topic string, client *client) []subscription {
@@ -85,7 +152,7 @@ func (ps *pubSub) publish(topic string, message []byte, excludeClient *client) {
 	subscriptions := ps.getSubscriptions(topic, nil)
 
 	for _, sub := range subscriptions {
-		sub.Client.Send(message)
+		sub.Client.send(message)
 	}
 }
 
@@ -98,33 +165,6 @@ func (ps *pubSub) unsubscribe(client *client, topic string) *pubSub {
 				ps.Subscriptions = append(ps.Subscriptions[:index], ps.Subscriptions[index+1:]...)
 			}
 		}
-	}
-
-	return ps
-}
-
-func (ps *pubSub) handleReceiveMessage(client client, messageType int, payload []byte) *pubSub {
-	m := newMessage()
-
-	if err := json.Unmarshal(payload, &m); err != nil {
-		return ps
-	}
-
-	switch m.Action {
-	case publish:
-		ps.publish(m.Topic, m.Message, nil)
-		break
-
-	case subscribe:
-		ps.subscribe(&client, m.Topic)
-		break
-
-	case unsubscribe:
-		ps.unsubscribe(&client, m.Topic)
-		break
-
-	default:
-		break
 	}
 
 	return ps
