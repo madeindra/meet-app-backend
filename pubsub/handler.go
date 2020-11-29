@@ -18,7 +18,7 @@ func autoID() string {
 	return uuid.Must(uuid.NewRandom()).String()
 }
 
-var ps = &pubSub{}
+var ps = newPubSub()
 
 func WebsocketHandler(c *gin.Context) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
@@ -31,10 +31,7 @@ func WebsocketHandler(c *gin.Context) {
 		return
 	}
 
-	client := client{
-		ID:         autoID(),
-		Connection: conn,
-	}
+	client := newClient(autoID(), conn)
 
 	ps.addClient(client)
 	log.Println("New Client is connected, total: ", len(ps.Clients))

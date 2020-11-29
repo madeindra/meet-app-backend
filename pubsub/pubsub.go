@@ -16,6 +16,13 @@ type pubSub struct {
 	Subscriptions []subscription
 }
 
+func newPubSub() *pubSub {
+	return &pubSub{
+		Clients:       make([]client, 0),
+		Subscriptions: make([]subscription, 0),
+	}
+}
+
 func (ps *pubSub) addClient(client client) *pubSub {
 	ps.Clients = append(ps.Clients, client)
 	payload := []byte("Hello Client ID:" + client.ID)
@@ -62,12 +69,9 @@ func (ps *pubSub) subscribe(client *client, topic string) *pubSub {
 		return ps
 	}
 
-	newSubscription := subscription{
-		Topic:  topic,
-		Client: client,
-	}
+	subsctiption := newSubscription(topic, client)
 
-	ps.Subscriptions = append(ps.Subscriptions, newSubscription)
+	ps.Subscriptions = append(ps.Subscriptions, subsctiption)
 	return ps
 }
 
@@ -90,7 +94,7 @@ func (ps *pubSub) unsubscribe(client *client, topic string) *pubSub {
 }
 
 func (ps *pubSub) handleReceiveMessage(client client, messageType int, payload []byte) *pubSub {
-	m := message{}
+	m := newMessage()
 
 	if err := json.Unmarshal(payload, &m); err != nil {
 		log.Println("This is not correct message payload")
