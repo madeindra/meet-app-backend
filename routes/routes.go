@@ -3,11 +3,13 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+
 	"github.com/madeindra/meet-app/common"
 	"github.com/madeindra/meet-app/controllers"
 	"github.com/madeindra/meet-app/helpers"
 	"github.com/madeindra/meet-app/middlewares"
 	"github.com/madeindra/meet-app/models"
+	"github.com/madeindra/meet-app/pubsub"
 	"github.com/madeindra/meet-app/validators"
 )
 
@@ -15,6 +17,7 @@ const (
 	rootPath string = "/"
 	v1Path   string = "/api/v1"
 
+	chatPath         string = "/chat"
 	authenticatePath string = "/authentication"
 	registerPath     string = "/registration"
 	credentialIDPath string = "/credential/:id"
@@ -52,6 +55,7 @@ func RouterInit() *gin.Engine {
 	matchController := controllers.NewMatchController(matchModel, credentialModel)
 
 	router.GET(rootPath, pingController.Ping)
+	router.GET(chatPath, pubsub.WebsocketHandler)
 
 	v1 := router.Group(v1Path)
 	auth := v1.Group(authenticatePath)
