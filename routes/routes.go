@@ -9,7 +9,6 @@ import (
 	"github.com/madeindra/meet-app/helpers"
 	"github.com/madeindra/meet-app/middlewares"
 	"github.com/madeindra/meet-app/models"
-	"github.com/madeindra/meet-app/pubsub"
 	"github.com/madeindra/meet-app/validators"
 )
 
@@ -55,7 +54,7 @@ func RouterInit() *gin.Engine {
 	matchController := controllers.NewMatchController(matchModel, credentialModel)
 
 	router.GET(rootPath, pingController.Ping)
-	router.GET(chatPath, pubsub.WebsocketHandler)
+	router.GET(chatPath, controllers.WebsocketHandler)
 
 	v1 := router.Group(v1Path)
 	auth := v1.Group(authenticatePath)
