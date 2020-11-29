@@ -32,16 +32,12 @@ func WebsocketHandler(c *gin.Context) {
 	}
 
 	client := newClient(autoID(), conn)
-
 	ps.addClient(client)
-	log.Println("New Client is connected, total: ", len(ps.Clients))
 
 	for {
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("Something went wrong", err)
 			ps.removeClient(client)
-			log.Println("total clients and subscriptions ", len(ps.Clients), len(ps.Subscriptions))
 			return
 		}
 		ps.handleReceiveMessage(client, messageType, p)
