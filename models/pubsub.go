@@ -64,22 +64,26 @@ func (ps *pubSub) AddClient(client client) *pubSub {
 }
 
 func (ps *pubSub) RemoveClient(client client) *pubSub {
-	for index, sub := range ps.Subscriptions {
+	for i := 0; i < len(ps.Subscriptions); i++ {
+		sub := ps.Subscriptions[i]
 		if client.ID == sub.Client.ID {
-			if index == len(ps.Subscriptions)-1 {
+			if i == len(ps.Subscriptions)-1 {
 				ps.Subscriptions = ps.Subscriptions[:len(ps.Subscriptions)-1]
 			} else {
-				ps.Subscriptions = append(ps.Subscriptions[:index], ps.Subscriptions[index+1:]...)
+				ps.Subscriptions = append(ps.Subscriptions[:i], ps.Subscriptions[i+1:]...)
+				i--
 			}
 		}
 	}
 
-	for index, c := range ps.Clients {
+	for i := 0; i < len(ps.Clients); i++ {
+		c := ps.Clients[i]
 		if c.ID == client.ID {
-			if index == len(ps.Clients)-1 {
+			if i == len(ps.Clients)-1 {
 				ps.Clients = ps.Clients[:len(ps.Clients)-1]
 			} else {
-				ps.Clients = append(ps.Clients[:index], ps.Clients[index+1:]...)
+				ps.Clients = append(ps.Clients[:i], ps.Clients[i+1:]...)
+				i--
 			}
 		}
 	}
@@ -157,12 +161,14 @@ func (ps *pubSub) publish(topic string, message []byte, excludeClient *client) {
 }
 
 func (ps *pubSub) unsubscribe(client *client, topic string) *pubSub {
-	for index, sub := range ps.Subscriptions {
+	for i := 0; i < len(ps.Subscriptions); i++ {
+		sub := ps.Subscriptions[i]
 		if sub.Client.ID == client.ID && sub.Topic == topic {
-			if index == len(ps.Subscriptions)-1 {
+			if i == len(ps.Subscriptions)-1 {
 				ps.Subscriptions = ps.Subscriptions[:len(ps.Subscriptions)-1]
 			} else {
-				ps.Subscriptions = append(ps.Subscriptions[:index], ps.Subscriptions[index+1:]...)
+				ps.Subscriptions = append(ps.Subscriptions[:i], ps.Subscriptions[i+1:]...)
+				i--
 			}
 		}
 	}
