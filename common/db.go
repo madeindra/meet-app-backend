@@ -8,7 +8,10 @@ import (
 var db *gorm.DB
 
 func DBInit() {
-	conn, err := gorm.Open("sqlite3", ":memory:")
+	provider := GetDatabaseProvider()
+	host := GetDatabaseHost()
+
+	conn, err := gorm.Open(provider, host)
 
 	if err != nil {
 		panic("Failed while connecting to database")
