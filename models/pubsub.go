@@ -2,8 +2,11 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
+	"log"
 
 	"github.com/gorilla/websocket"
+	"github.com/jinzhu/gorm"
 )
 
 const (
@@ -19,12 +22,14 @@ type pubSub struct {
 
 type PubSubInterface interface {
 	AddClient(client client) *pubSub
+	AddChat(data Chats) (Chats, error)
 	RemoveClient(client client) *pubSub
-	HandleReceiveMessage(client client, messageType int, payload []byte) *pubSub
+	HandleReceiveMessage(client client, messageType int, payload []byte) (*pubSub, error)
 }
 
 type PubSubImplementation struct {
-	PubSub *pubSub
+	db     *gorm.DB
+	pubSub *pubSub
 }
 
 type client struct {
@@ -38,9 +43,9 @@ type subscription struct {
 }
 
 type message struct {
-	Action  string          `json:"action"`
-	Topic   string          `json:"topic"`
-	Message json.RawMessage `json:"message"`
+	Action string          `json:"action"`
+	Topic  string          `json:"topic"`
+	Data   json.RawMessage `json:"data"`
 }
 
 func NewPubSub() *pubSub {
@@ -50,8 +55,8 @@ func NewPubSub() *pubSub {
 	}
 }
 
-func NewPubSubModel(ps *pubSub) *PubSubImplementation {
-	return &PubSubImplementation{PubSub: ps}
+func NewPubSubModel(db *gorm.DB, ps *pubSub) *PubSubImplementation {
+	return &PubSubImplementation{db: db, pubSub: ps}
 }
 
 func NewClient(id string, conn *websocket.Conn) client {
@@ -59,6 +64,10 @@ func NewClient(id string, conn *websocket.Conn) client {
 		ID:         id,
 		Connection: conn,
 	}
+}
+
+func newMessageContent() Chats {
+	return Chats{}
 }
 
 func newSubscription(topic string, client *client) subscription {
@@ -73,63 +82,85 @@ func newMessage() *message {
 }
 
 func (implementation *PubSubImplementation) AddClient(client client) *pubSub {
-	implementation.PubSub.Clients = append(implementation.PubSub.Clients, client)
-	return implementation.PubSub
+	implementation.pubSub.Clients = append(implementation.pubSub.Clients, client)
+	return implementation.pubSub
 }
 
 func (implementation *PubSubImplementation) RemoveClient(client client) *pubSub {
-	for i := 0; i < len(implementation.PubSub.Subscriptions); i++ {
-		sub := implementation.PubSub.Subscriptions[i]
+	for i := 0; i < len(implementation.pubSub.Subscriptions); i++ {
+		sub := implementation.pubSub.Subscriptions[i]
 		if client.ID == sub.Client.ID {
-			if i == len(implementation.PubSub.Subscriptions)-1 {
-				implementation.PubSub.Subscriptions = implementation.PubSub.Subscriptions[:len(implementation.PubSub.Subscriptions)-1]
+			if i == len(implementation.pubSub.Subscriptions)-1 {
+				implementation.pubSub.Subscriptions = implementation.pubSub.Subscriptions[:len(implementation.pubSub.Subscriptions)-1]
 			} else {
-				implementation.PubSub.Subscriptions = append(implementation.PubSub.Subscriptions[:i], implementation.PubSub.Subscriptions[i+1:]...)
+				implementation.pubSub.Subscriptions = append(implementation.pubSub.Subscriptions[:i], implementation.pubSub.Subscriptions[i+1:]...)
 				i--
 			}
 		}
 	}
 
-	for i := 0; i < len(implementation.PubSub.Clients); i++ {
-		c := implementation.PubSub.Clients[i]
+	for i := 0; i < len(implementation.pubSub.Clients); i++ {
+		c := implementation.pubSub.Clients[i]
 		if c.ID == client.ID {
-			if i == len(implementation.PubSub.Clients)-1 {
-				implementation.PubSub.Clients = implementation.PubSub.Clients[:len(implementation.PubSub.Clients)-1]
+			if i == len(implementation.pubSub.Clients)-1 {
+				implementation.pubSub.Clients = implementation.pubSub.Clients[:len(implementation.pubSub.Clients)-1]
 			} else {
-				implementation.PubSub.Clients = append(implementation.PubSub.Clients[:i], implementation.PubSub.Clients[i+1:]...)
+				implementation.pubSub.Clients = append(implementation.pubSub.Clients[:i], implementation.pubSub.Clients[i+1:]...)
 				i--
 			}
 		}
 	}
 
-	return implementation.PubSub
+	return implementation.pubSub
 }
 
-func (implementation *PubSubImplementation) HandleReceiveMessage(client client, messageType int, payload []byte) *pubSub {
+func (implementation *PubSubImplementation) HandleReceiveMessage(client client, messageType int, payload []byte) (*pubSub, error) {
 	m := newMessage()
-
 	if err := json.Unmarshal(payload, &m); err != nil {
-		return implementation.PubSub
+		return implementation.pubSub, errors.New("Failed binding message")
 	}
 
 	switch m.Action {
 	case publish:
-		implementation.PubSub.publish(m.Topic, m.Message, nil)
+		implementation.pubSub.publish(m.Topic, m.Data, nil)
+
+		ch := newMessageContent()
+		if err := json.Unmarshal(m.Data, &ch); err != nil {
+			return implementation.pubSub, errors.New("Failed binding message content")
+		}
+
+		if ch.Sender == 0 || ch.Target == 0 || ch.Content == "" {
+			log.Printf("Bad message %s", string(m.Data))
+			return implementation.pubSub, errors.New("Message is not in a proper format")
+		}
+
+		go implementation.AddChat(ch)
 		break
 
 	case subscribe:
-		implementation.PubSub.subscribe(&client, m.Topic)
+		implementation.pubSub.subscribe(&client, m.Topic)
 		break
 
 	case unsubscribe:
-		implementation.PubSub.unsubscribe(&client, m.Topic)
+		implementation.pubSub.unsubscribe(&client, m.Topic)
 		break
 
 	default:
 		break
 	}
 
-	return implementation.PubSub
+	return implementation.pubSub, nil
+}
+
+func (implementation *PubSubImplementation) AddChat(data Chats) (Chats, error) {
+	tx := implementation.db.Begin()
+
+	if err := tx.Create(&data).Error; err != nil {
+		tx.Rollback()
+		return Chats{}, err
+	}
+
+	return data, tx.Commit().Error
 }
 
 func (client *client) send(message []byte) error {
