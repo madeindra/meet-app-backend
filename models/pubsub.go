@@ -2,44 +2,37 @@ package models
 
 import (
 	"encoding/json"
-	"errors"
-	"log"
 
 	"github.com/gorilla/websocket"
-	"github.com/jinzhu/gorm"
-)
-
-const (
-	publish     = "publish"
-	subscribe   = "subscribe"
-	unsubscribe = "unsubscribe"
 )
 
 type pubSub struct {
-	Clients       []client
+	Clients       []Client
 	Subscriptions []subscription
 }
 
 type PubSubInterface interface {
-	AddClient(client client) *pubSub
-	AddChat(data Chats) (Chats, error)
-	RemoveClient(client client) *pubSub
-	HandleReceiveMessage(client client, messageType int, payload []byte) (*pubSub, error)
+	NewClient(id string, conn *websocket.Conn) Client
+	NewMessage() *message
+	AddClient(Client Client) *pubSub
+	RemoveClient(Client Client) *pubSub
+	Publish(topic string, message []byte, excludeClient *Client)
+	Subscribe(Client *Client, topic string) *pubSub
+	Unsubscribe(Client *Client, topic string) *pubSub
 }
 
 type PubSubImplementation struct {
-	db     *gorm.DB
 	pubSub *pubSub
 }
 
-type client struct {
+type Client struct {
 	ID         string
 	Connection *websocket.Conn
 }
 
 type subscription struct {
 	Topic  string
-	Client *client
+	Client *Client
 }
 
 type message struct {
@@ -50,46 +43,35 @@ type message struct {
 
 func NewPubSub() *pubSub {
 	return &pubSub{
-		Clients:       make([]client, 0),
+		Clients:       make([]Client, 0),
 		Subscriptions: make([]subscription, 0),
 	}
 }
 
-func NewPubSubModel(db *gorm.DB, ps *pubSub) *PubSubImplementation {
-	return &PubSubImplementation{db: db, pubSub: ps}
+func NewPubSubModel(ps *pubSub) *PubSubImplementation {
+	return &PubSubImplementation{pubSub: ps}
 }
 
-func NewClient(id string, conn *websocket.Conn) client {
-	return client{
+func (implementation *PubSubImplementation) NewClient(id string, conn *websocket.Conn) Client {
+	return Client{
 		ID:         id,
 		Connection: conn,
 	}
 }
 
-func newMessageContent() Chats {
-	return Chats{}
-}
-
-func newSubscription(topic string, client *client) subscription {
-	return subscription{
-		Topic:  topic,
-		Client: client,
-	}
-}
-
-func newMessage() *message {
+func (implementation *PubSubImplementation) NewMessage() *message {
 	return &message{}
 }
 
-func (implementation *PubSubImplementation) AddClient(client client) *pubSub {
-	implementation.pubSub.Clients = append(implementation.pubSub.Clients, client)
+func (implementation *PubSubImplementation) AddClient(Client Client) *pubSub {
+	implementation.pubSub.Clients = append(implementation.pubSub.Clients, Client)
 	return implementation.pubSub
 }
 
-func (implementation *PubSubImplementation) RemoveClient(client client) *pubSub {
+func (implementation *PubSubImplementation) RemoveClient(Client Client) *pubSub {
 	for i := 0; i < len(implementation.pubSub.Subscriptions); i++ {
 		sub := implementation.pubSub.Subscriptions[i]
-		if client.ID == sub.Client.ID {
+		if Client.ID == sub.Client.ID {
 			if i == len(implementation.pubSub.Subscriptions)-1 {
 				implementation.pubSub.Subscriptions = implementation.pubSub.Subscriptions[:len(implementation.pubSub.Subscriptions)-1]
 			} else {
@@ -101,7 +83,7 @@ func (implementation *PubSubImplementation) RemoveClient(client client) *pubSub 
 
 	for i := 0; i < len(implementation.pubSub.Clients); i++ {
 		c := implementation.pubSub.Clients[i]
-		if c.ID == client.ID {
+		if c.ID == Client.ID {
 			if i == len(implementation.pubSub.Clients)-1 {
 				implementation.pubSub.Clients = implementation.pubSub.Clients[:len(implementation.pubSub.Clients)-1]
 			} else {
@@ -114,65 +96,58 @@ func (implementation *PubSubImplementation) RemoveClient(client client) *pubSub 
 	return implementation.pubSub
 }
 
-func (implementation *PubSubImplementation) HandleReceiveMessage(client client, messageType int, payload []byte) (*pubSub, error) {
-	m := newMessage()
-	if err := json.Unmarshal(payload, &m); err != nil {
-		return implementation.pubSub, errors.New("Failed binding message")
+func (implementation *PubSubImplementation) Publish(topic string, message []byte, excludeClient *Client) {
+	subscriptions := implementation.pubSub.getSubscriptions(topic, nil)
+
+	for _, sub := range subscriptions {
+		sub.Client.send(message)
+	}
+}
+
+func (implementation *PubSubImplementation) Subscribe(Client *Client, topic string) *pubSub {
+	clientSubs := implementation.pubSub.getSubscriptions(topic, Client)
+	if len(clientSubs) > 0 {
+		return implementation.pubSub
 	}
 
-	switch m.Action {
-	case publish:
-		implementation.pubSub.publish(m.Topic, m.Data, nil)
+	subscription := implementation.pubSub.newSubscription(topic, Client)
+	implementation.pubSub.Subscriptions = append(implementation.pubSub.Subscriptions, subscription)
+	return implementation.pubSub
+}
 
-		ch := newMessageContent()
-		if err := json.Unmarshal(m.Data, &ch); err != nil {
-			return implementation.pubSub, errors.New("Failed binding message content")
+func (implementation *PubSubImplementation) Unsubscribe(Client *Client, topic string) *pubSub {
+	for i := 0; i < len(implementation.pubSub.Subscriptions); i++ {
+		sub := implementation.pubSub.Subscriptions[i]
+		if sub.Client.ID == Client.ID && sub.Topic == topic {
+			if i == len(implementation.pubSub.Subscriptions)-1 {
+				implementation.pubSub.Subscriptions = implementation.pubSub.Subscriptions[:len(implementation.pubSub.Subscriptions)-1]
+			} else {
+				implementation.pubSub.Subscriptions = append(implementation.pubSub.Subscriptions[:i], implementation.pubSub.Subscriptions[i+1:]...)
+				i--
+			}
 		}
-
-		if ch.Sender == 0 || ch.Target == 0 || ch.Content == "" {
-			log.Printf("Bad message %s", string(m.Data))
-			return implementation.pubSub, errors.New("Message is not in a proper format")
-		}
-
-		go implementation.AddChat(ch)
-		break
-
-	case subscribe:
-		implementation.pubSub.subscribe(&client, m.Topic)
-		break
-
-	case unsubscribe:
-		implementation.pubSub.unsubscribe(&client, m.Topic)
-		break
-
-	default:
-		break
 	}
 
-	return implementation.pubSub, nil
+	return implementation.pubSub
 }
 
-func (implementation *PubSubImplementation) AddChat(data Chats) (Chats, error) {
-	tx := implementation.db.Begin()
+func (Client *Client) send(message []byte) error {
+	return Client.Connection.WriteMessage(1, message)
+}
 
-	if err := tx.Create(&data).Error; err != nil {
-		tx.Rollback()
-		return Chats{}, err
+func (ps *pubSub) newSubscription(topic string, Client *Client) subscription {
+	return subscription{
+		Topic:  topic,
+		Client: Client,
 	}
-
-	return data, tx.Commit().Error
 }
 
-func (client *client) send(message []byte) error {
-	return client.Connection.WriteMessage(1, message)
-}
-
-func (ps *pubSub) getSubscriptions(topic string, client *client) []subscription {
+func (ps *pubSub) getSubscriptions(topic string, Client *Client) []subscription {
 	var subscriptionList []subscription
 
 	for _, subscription := range ps.Subscriptions {
-		if client != nil {
-			if subscription.Client.ID == client.ID && subscription.Topic == topic {
+		if Client != nil {
+			if subscription.Client.ID == Client.ID && subscription.Topic == topic {
 				subscriptionList = append(subscriptionList, subscription)
 			}
 
@@ -184,39 +159,4 @@ func (ps *pubSub) getSubscriptions(topic string, client *client) []subscription 
 	}
 
 	return subscriptionList
-}
-
-func (ps *pubSub) subscribe(client *client, topic string) *pubSub {
-	clientSubs := ps.getSubscriptions(topic, client)
-	if len(clientSubs) > 0 {
-		return ps
-	}
-
-	subsctiption := newSubscription(topic, client)
-	ps.Subscriptions = append(ps.Subscriptions, subsctiption)
-	return ps
-}
-
-func (ps *pubSub) publish(topic string, message []byte, excludeClient *client) {
-	subscriptions := ps.getSubscriptions(topic, nil)
-
-	for _, sub := range subscriptions {
-		sub.Client.send(message)
-	}
-}
-
-func (ps *pubSub) unsubscribe(client *client, topic string) *pubSub {
-	for i := 0; i < len(ps.Subscriptions); i++ {
-		sub := ps.Subscriptions[i]
-		if sub.Client.ID == client.ID && sub.Topic == topic {
-			if i == len(ps.Subscriptions)-1 {
-				ps.Subscriptions = ps.Subscriptions[:len(ps.Subscriptions)-1]
-			} else {
-				ps.Subscriptions = append(ps.Subscriptions[:i], ps.Subscriptions[i+1:]...)
-				i--
-			}
-		}
-	}
-
-	return ps
 }
