@@ -91,6 +91,7 @@ func (controller *PubSubController) processMessage(client models.Client, message
 		break
 
 	default:
+		controller.pubsub.BounceBack(&client, "Server: Action unrecognized")
 		break
 	}
 }
