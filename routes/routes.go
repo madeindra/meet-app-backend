@@ -40,6 +40,9 @@ func RouterInit() *gin.Engine {
 	bearerHelper := helpers.NewJWTHelper()
 	randomHelper := helpers.NewRandomHelper()
 
+	pubSub := models.NewPubSub()
+
+	pubSubModel := models.NewPubSubModel(pubSub)
 	credentialModel := models.NewCredentialModel(db)
 	tokenModel := models.NewTokenModel(db)
 	resetModel := models.NewResetModel(db)
@@ -47,6 +50,7 @@ func RouterInit() *gin.Engine {
 	matchModel := models.NewMatchModel(db)
 
 	pingController := controllers.NewPingController()
+	pubSubController := controllers.NewPubSubController(pubSubModel)
 	credentialController := controllers.NewCredentialController(credentialModel, tokenModel, profileModel, hashHelper, bearerHelper)
 	resetController := controllers.NewResetController(resetModel, credentialModel, hashHelper, randomHelper)
 	tokenController := controllers.NewTokenController(tokenModel, credentialModel, bearerHelper)
@@ -54,7 +58,7 @@ func RouterInit() *gin.Engine {
 	matchController := controllers.NewMatchController(matchModel, credentialModel)
 
 	router.GET(rootPath, pingController.Ping)
-	router.GET(chatPath, controllers.WebsocketHandler)
+	router.GET(chatPath, pubSubController.WebsocketHandler)
 
 	v1 := router.Group(v1Path)
 	auth := v1.Group(authenticatePath)
