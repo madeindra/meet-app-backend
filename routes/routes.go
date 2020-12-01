@@ -59,9 +59,9 @@ func RouterInit() *gin.Engine {
 	matchController := controllers.NewMatchController(matchModel, credentialModel)
 
 	router.GET(rootPath, pingController.Ping)
-	router.GET(chatPath, pubSubController.WebsocketHandler)
 
 	v1 := router.Group(v1Path)
+	chat := router.Group(rootPath)
 	auth := v1.Group(authenticatePath)
 
 	auth.Use(middlewares.Basic())
@@ -71,6 +71,10 @@ func RouterInit() *gin.Engine {
 	auth.POST(tokenPath, tokenController.Refresh)
 	auth.POST(resetPath, resetController.Start)
 	auth.PUT(resetIDPath, resetController.Complete)
+
+	chat.Use(middlewares.Jwt())
+
+	chat.GET(chatPath, pubSubController.WebsocketHandler)
 
 	v1.Use(middlewares.Jwt())
 
