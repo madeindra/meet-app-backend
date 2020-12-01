@@ -8,7 +8,7 @@ type Chats struct {
 	ID      uint64 `gorm:"primaryKey"`
 	Sender  uint64
 	Target  uint64
-	Message string
+	Content string
 }
 
 type ChatsInterface interface {
