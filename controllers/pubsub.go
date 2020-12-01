@@ -73,7 +73,12 @@ func (controller *PubSubController) processMessage(client models.Client, message
 			break
 		}
 
-		if ch.Sender == 0 || ch.Target == 0 || ch.Content == "" {
+		//TODO: Get SenderID & make sure it's the authenticated user
+		//TODO: Inject sender id, refactor message content
+		//TODO: Add finding sender/target exist / not from db
+
+		ch.Target = m.Topic
+		if ch.Sender == 0 || ch.Content == "" {
 			controller.pubsub.BounceBack(&client, "Server: Message is not in a proper format")
 			break
 		}
@@ -83,6 +88,7 @@ func (controller *PubSubController) processMessage(client models.Client, message
 		break
 
 	case subscribe:
+		//TODO: Get SenderID & make sure it's the authenticated user
 		controller.pubsub.Subscribe(&client, m.Topic)
 		break
 
