@@ -16,10 +16,10 @@ type PubSubInterface interface {
 	NewMessage() *message
 	AddClient(client Client) *pubSub
 	RemoveClient(client Client) *pubSub
-	Publish(topic string, message []byte, excludeClient *Client)
+	Publish(topic uint64, message []byte, excludeClient *Client)
 	BounceBack(client *Client, message string)
-	Subscribe(client *Client, topic string) *pubSub
-	Unsubscribe(client *Client, topic string) *pubSub
+	Subscribe(client *Client, topic uint64) *pubSub
+	Unsubscribe(client *Client, topic uint64) *pubSub
 }
 
 type PubSubImplementation struct {
@@ -32,13 +32,13 @@ type Client struct {
 }
 
 type subscription struct {
-	Topic  string
+	Topic  uint64
 	Client *Client
 }
 
 type message struct {
 	Action string          `json:"action"`
-	Topic  string          `json:"topic"`
+	Topic  uint64          `json:"topic"`
 	Data   json.RawMessage `json:"data"`
 }
 
@@ -97,7 +97,7 @@ func (implementation *PubSubImplementation) RemoveClient(client Client) *pubSub 
 	return implementation.pubSub
 }
 
-func (implementation *PubSubImplementation) Publish(topic string, message []byte, excludeClient *Client) {
+func (implementation *PubSubImplementation) Publish(topic uint64, message []byte, excludeClient *Client) {
 	subscriptions := implementation.pubSub.getSubscriptions(topic, nil)
 
 	for _, sub := range subscriptions {
@@ -109,7 +109,7 @@ func (implementation *PubSubImplementation) BounceBack(client *Client, message s
 	client.send([]byte(message))
 }
 
-func (implementation *PubSubImplementation) Subscribe(client *Client, topic string) *pubSub {
+func (implementation *PubSubImplementation) Subscribe(client *Client, topic uint64) *pubSub {
 	clientSubs := implementation.pubSub.getSubscriptions(topic, client)
 	if len(clientSubs) > 0 {
 		return implementation.pubSub
@@ -120,7 +120,7 @@ func (implementation *PubSubImplementation) Subscribe(client *Client, topic stri
 	return implementation.pubSub
 }
 
-func (implementation *PubSubImplementation) Unsubscribe(client *Client, topic string) *pubSub {
+func (implementation *PubSubImplementation) Unsubscribe(client *Client, topic uint64) *pubSub {
 	for i := 0; i < len(implementation.pubSub.Subscriptions); i++ {
 		sub := implementation.pubSub.Subscriptions[i]
 		if sub.Client.ID == client.ID && sub.Topic == topic {
@@ -140,14 +140,14 @@ func (Client *Client) send(message []byte) error {
 	return Client.Connection.WriteMessage(1, message)
 }
 
-func (ps *pubSub) newSubscription(topic string, Client *Client) subscription {
+func (ps *pubSub) newSubscription(topic uint64, Client *Client) subscription {
 	return subscription{
 		Topic:  topic,
 		Client: Client,
 	}
 }
 
-func (ps *pubSub) getSubscriptions(topic string, Client *Client) []subscription {
+func (ps *pubSub) getSubscriptions(topic uint64, Client *Client) []subscription {
 	var subscriptionList []subscription
 
 	for _, subscription := range ps.Subscriptions {
