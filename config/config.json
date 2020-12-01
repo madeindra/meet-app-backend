@@ -2,6 +2,10 @@
     "server": {
         "port": 8080
     },
+    "database": {
+        "provider": "sqlite3",
+        "host": ":memory:"
+    },
     "basic": {
         "username": "foo",
         "password": "bar"
