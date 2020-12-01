@@ -42,7 +42,7 @@ func RouterInit() *gin.Engine {
 
 	pubSub := models.NewPubSub()
 
-	pubSubModel := models.NewPubSubModel(pubSub)
+	pubSubModel := models.NewPubSubModel(db, pubSub)
 	credentialModel := models.NewCredentialModel(db)
 	tokenModel := models.NewTokenModel(db)
 	resetModel := models.NewResetModel(db)
