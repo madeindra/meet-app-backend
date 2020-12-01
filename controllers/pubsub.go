@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 
@@ -60,26 +59,26 @@ func (controller *PubSubController) WebsocketHandler(c *gin.Context) {
 	}
 }
 
-func (controller *PubSubController) processMessage(client models.Client, messageType int, payload []byte) error {
+func (controller *PubSubController) processMessage(client models.Client, messageType int, payload []byte) {
 	m := controller.pubsub.NewMessage()
 	if err := json.Unmarshal(payload, &m); err != nil {
-		return errors.New("Failed binding message")
+		controller.pubsub.BounceBack(&client, "Server: Failed binding message")
 	}
 
 	switch m.Action {
 	case publish:
-		controller.pubsub.Publish(m.Topic, m.Data, nil)
-
 		ch := controller.chat.New()
 		if err := json.Unmarshal(m.Data, &ch); err != nil {
-			return errors.New("Failed binding message content")
+			controller.pubsub.BounceBack(&client, "Server: Failed binding message content")
+			break
 		}
 
 		if ch.Sender == 0 || ch.Target == 0 || ch.Content == "" {
-			log.Printf("Bad message %s", string(m.Data))
-			return errors.New("Message is not in a proper format")
+			controller.pubsub.BounceBack(&client, "Server: Message is not in a proper format")
+			break
 		}
 
+		go controller.pubsub.Publish(m.Topic, m.Data, nil)
 		go controller.chat.Create(ch)
 		break
 
@@ -94,6 +93,4 @@ func (controller *PubSubController) processMessage(client models.Client, message
 	default:
 		break
 	}
-
-	return nil
 }
