@@ -17,6 +17,16 @@ type pubSub struct {
 	Subscriptions []subscription
 }
 
+type PubSubInterface interface {
+	AddClient(client client) *pubSub
+	RemoveClient(client client) *pubSub
+	HandleReceiveMessage(client client, messageType int, payload []byte) *pubSub
+}
+
+type PubSubImplementation struct {
+	PubSub *pubSub
+}
+
 type client struct {
 	ID         string
 	Connection *websocket.Conn
@@ -40,6 +50,10 @@ func NewPubSub() *pubSub {
 	}
 }
 
+func NewPubSubModel(ps *pubSub) *PubSubImplementation {
+	return &PubSubImplementation{PubSub: ps}
+}
+
 func NewClient(id string, conn *websocket.Conn) client {
 	return client{
 		ID:         id,
@@ -58,64 +72,64 @@ func newMessage() *message {
 	return &message{}
 }
 
-func (ps *pubSub) AddClient(client client) *pubSub {
-	ps.Clients = append(ps.Clients, client)
-	return ps
+func (implementation *PubSubImplementation) AddClient(client client) *pubSub {
+	implementation.PubSub.Clients = append(implementation.PubSub.Clients, client)
+	return implementation.PubSub
 }
 
-func (ps *pubSub) RemoveClient(client client) *pubSub {
-	for i := 0; i < len(ps.Subscriptions); i++ {
-		sub := ps.Subscriptions[i]
+func (implementation *PubSubImplementation) RemoveClient(client client) *pubSub {
+	for i := 0; i < len(implementation.PubSub.Subscriptions); i++ {
+		sub := implementation.PubSub.Subscriptions[i]
 		if client.ID == sub.Client.ID {
-			if i == len(ps.Subscriptions)-1 {
-				ps.Subscriptions = ps.Subscriptions[:len(ps.Subscriptions)-1]
+			if i == len(implementation.PubSub.Subscriptions)-1 {
+				implementation.PubSub.Subscriptions = implementation.PubSub.Subscriptions[:len(implementation.PubSub.Subscriptions)-1]
 			} else {
-				ps.Subscriptions = append(ps.Subscriptions[:i], ps.Subscriptions[i+1:]...)
+				implementation.PubSub.Subscriptions = append(implementation.PubSub.Subscriptions[:i], implementation.PubSub.Subscriptions[i+1:]...)
 				i--
 			}
 		}
 	}
 
-	for i := 0; i < len(ps.Clients); i++ {
-		c := ps.Clients[i]
+	for i := 0; i < len(implementation.PubSub.Clients); i++ {
+		c := implementation.PubSub.Clients[i]
 		if c.ID == client.ID {
-			if i == len(ps.Clients)-1 {
-				ps.Clients = ps.Clients[:len(ps.Clients)-1]
+			if i == len(implementation.PubSub.Clients)-1 {
+				implementation.PubSub.Clients = implementation.PubSub.Clients[:len(implementation.PubSub.Clients)-1]
 			} else {
-				ps.Clients = append(ps.Clients[:i], ps.Clients[i+1:]...)
+				implementation.PubSub.Clients = append(implementation.PubSub.Clients[:i], implementation.PubSub.Clients[i+1:]...)
 				i--
 			}
 		}
 	}
 
-	return ps
+	return implementation.PubSub
 }
 
-func (ps *pubSub) HandleReceiveMessage(client client, messageType int, payload []byte) *pubSub {
+func (implementation *PubSubImplementation) HandleReceiveMessage(client client, messageType int, payload []byte) *pubSub {
 	m := newMessage()
 
 	if err := json.Unmarshal(payload, &m); err != nil {
-		return ps
+		return implementation.PubSub
 	}
 
 	switch m.Action {
 	case publish:
-		ps.publish(m.Topic, m.Message, nil)
+		implementation.PubSub.publish(m.Topic, m.Message, nil)
 		break
 
 	case subscribe:
-		ps.subscribe(&client, m.Topic)
+		implementation.PubSub.subscribe(&client, m.Topic)
 		break
 
 	case unsubscribe:
-		ps.unsubscribe(&client, m.Topic)
+		implementation.PubSub.unsubscribe(&client, m.Topic)
 		break
 
 	default:
 		break
 	}
 
-	return ps
+	return implementation.PubSub
 }
 
 func (client *client) send(message []byte) error {

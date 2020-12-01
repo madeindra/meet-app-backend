@@ -19,9 +19,15 @@ func autoID() string {
 	return uuid.Must(uuid.NewRandom()).String()
 }
 
-var ps = models.NewPubSub()
+type PubSubController struct {
+	pubsub models.PubSubInterface
+}
 
-func WebsocketHandler(c *gin.Context) {
+func NewPubSubController(pubsub models.PubSubInterface) *PubSubController {
+	return &PubSubController{pubsub}
+}
+
+func (controller *PubSubController) WebsocketHandler(c *gin.Context) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}
@@ -33,14 +39,14 @@ func WebsocketHandler(c *gin.Context) {
 	}
 
 	client := models.NewClient(autoID(), conn)
-	ps.AddClient(client)
+	controller.pubsub.AddClient(client)
 
 	for {
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {
-			ps.RemoveClient(client)
+			controller.pubsub.RemoveClient(client)
 			return
 		}
-		ps.HandleReceiveMessage(client, messageType, p)
+		controller.pubsub.HandleReceiveMessage(client, messageType, p)
 	}
 }
