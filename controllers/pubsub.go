@@ -45,6 +45,7 @@ func (controller *PubSubController) WebsocketHandler(c *gin.Context) {
 		log.Println(err)
 		return
 	}
+	defer conn.Close()
 
 	//TODO: Get ID from context & set as client ID
 	client := controller.pubsub.NewClient(autoID(), conn)
