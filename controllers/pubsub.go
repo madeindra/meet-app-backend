@@ -22,13 +22,14 @@ var upgrader = websocket.Upgrader{
 }
 
 type PubSubController struct {
-	pubsub models.PubSubInterface
-	chat   models.ChatsInterface
-	ticket models.TicketInterface
+	pubsub     models.PubSubInterface
+	chat       models.ChatsInterface
+	ticket     models.TicketInterface
+	credential models.CredentialInterface
 }
 
-func NewPubSubController(pubsub models.PubSubInterface, chat models.ChatsInterface, ticket models.TicketInterface) *PubSubController {
-	return &PubSubController{pubsub, chat, ticket}
+func NewPubSubController(pubsub models.PubSubInterface, chat models.ChatsInterface, ticket models.TicketInterface, credential models.CredentialInterface) *PubSubController {
+	return &PubSubController{pubsub, chat, ticket, credential}
 }
 
 func (controller *PubSubController) WebsocketHandler(ctx *gin.Context) {
@@ -49,7 +50,6 @@ func (controller *PubSubController) WebsocketHandler(ctx *gin.Context) {
 	}
 	defer conn.Close()
 
-	//TODO: Get ID from context & set as client ID
 	client := controller.pubsub.NewClient(userID, conn)
 	controller.pubsub.AddClient(client)
 
@@ -77,27 +77,35 @@ func (controller *PubSubController) processMessage(client models.Client, message
 			break
 		}
 
-		//TODO: Get SenderID & make sure it's the authenticated user
-		//TODO: Inject sender id, refactor message content
-		//TODO: Add finding sender/target exist / not from db
-
-		ch.Target = m.Topic
-		if ch.Sender == 0 || ch.Content == "" {
+		ch.Sender = client.ID
+		if ch.Target == 0 || ch.Content == "" {
 			controller.pubsub.BounceBack(&client, "Server: Message is not in a proper format")
 			break
 		}
 
-		go controller.pubsub.Publish(m.Topic, m.Data, nil)
+		user := controller.credential.New()
+		user.ID = ch.Target
+		if existing := controller.credential.FindOne(user); existing.Email == "" {
+			controller.pubsub.BounceBack(&client, "Server: Target does not exist")
+			break
+		}
+
+		content, err := json.Marshal(&ch)
+		if err != nil {
+			controller.pubsub.BounceBack(&client, "Server: Failed creating raw message")
+			break
+		}
+
+		go controller.pubsub.Publish(ch.Target, content, nil)
 		go controller.chat.Create(ch)
 		break
 
 	case subscribe:
-		//TODO: Get SenderID & make sure it's the authenticated user
-		controller.pubsub.Subscribe(&client, m.Topic)
+		controller.pubsub.Subscribe(&client, client.ID)
 		break
 
 	case unsubscribe:
-		controller.pubsub.Unsubscribe(&client, m.Topic)
+		controller.pubsub.Unsubscribe(&client, client.ID)
 		break
 
 	default:
