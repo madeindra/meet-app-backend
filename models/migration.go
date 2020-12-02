@@ -4,5 +4,5 @@ import "github.com/madeindra/meet-app/common"
 
 func Migrate() {
 	db := common.GetDB()
-	db.AutoMigrate(&credentials{}, &Profiles{}, &tokens{}, &Matches{}, &resets{}, &Chats{})
+	db.AutoMigrate(&credentials{}, &Profiles{}, &tokens{}, &tickets{}, &Matches{}, &resets{}, &Chats{})
 }
