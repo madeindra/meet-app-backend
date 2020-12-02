@@ -37,18 +37,12 @@ func Jwt() gin.HandlerFunc {
 }
 
 func getBearerToken(ctx *gin.Context) (string, error) {
-	tokenHeader := ctx.GetHeader("Authorization")
-	tokenParam := ctx.Query("access_token")
-
-	if tokenHeader == "" && tokenParam == "" {
-		return "", errors.New("Invalid Authoization Method")
+	token := ctx.GetHeader("Authorization")
+	if token == "" {
+		return "", errors.New("Invalid Header")
 	}
 
-	if tokenHeader == "" {
-		return tokenParam, nil
-	}
-
-	extractedToken := strings.Split(tokenHeader, "Bearer ")
+	extractedToken := strings.Split(token, "Bearer ")
 	if len(extractedToken) != 2 {
 		return "", errors.New("Invalid token")
 	}
