@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -36,10 +35,6 @@ func NewPubSubController(pubsub models.PubSubInterface, chat models.ChatsInterfa
 }
 
 func (controller *PubSubController) WebsocketHandler(c *gin.Context) {
-	upgrader.CheckOrigin = func(r *http.Request) bool {
-		return true
-	}
-
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Println(err)
