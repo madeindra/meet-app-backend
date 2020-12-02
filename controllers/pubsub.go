@@ -34,8 +34,8 @@ func NewPubSubController(pubsub models.PubSubInterface, chat models.ChatsInterfa
 	return &PubSubController{pubsub, chat}
 }
 
-func (controller *PubSubController) WebsocketHandler(c *gin.Context) {
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+func (controller *PubSubController) WebsocketHandler(ctx *gin.Context) {
+	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		log.Println(err)
 		return
