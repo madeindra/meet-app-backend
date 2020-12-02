@@ -5,7 +5,7 @@ import (
 )
 
 type Chats struct {
-	ID      uint64 `gorm:"primaryKey"`
+	ID      uint64 `gorm:"primaryKey" json:",omitempty"`
 	Sender  uint64
 	Target  uint64
 	Content string
