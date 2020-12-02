@@ -14,13 +14,15 @@ import (
 type CredentialController struct {
 	credential models.CredentialInterface
 	token      models.TokenInterface
+	ticket     models.TicketInterface
 	profile    models.ProfilesInterface
 	hash       helpers.HashInterface
 	bearer     helpers.JWTInterface
+	random     helpers.RandomInterface
 }
 
-func NewCredentialController(credential models.CredentialInterface, token models.TokenInterface, profile models.ProfilesInterface, hash helpers.HashInterface, bearer helpers.JWTInterface) *CredentialController {
-	return &CredentialController{credential, token, profile, hash, bearer}
+func NewCredentialController(credential models.CredentialInterface, token models.TokenInterface, ticket models.TicketInterface, profile models.ProfilesInterface, hash helpers.HashInterface, bearer helpers.JWTInterface, random helpers.RandomInterface) *CredentialController {
+	return &CredentialController{credential, token, ticket, profile, hash, bearer, random}
 }
 
 func (controller *CredentialController) Register(ctx *gin.Context) {
@@ -146,8 +148,33 @@ func (controller *CredentialController) Login(ctx *gin.Context) {
 		return
 	}
 
+	// generate websocket ticket
+	ticket := controller.random.RandomString(16)
+
+	ticketData := controller.ticket.New()
+	ticketData.UserID = credential.ID
+
+	// find existing websocket ticket data in db, if not exist create with user id
+	if exist := controller.ticket.FindOne(ticketData); exist.ID == 0 {
+		if _, err := controller.ticket.Create(ticketData); err != nil {
+			res := entities.InterenalServerErrorResponse()
+			ctx.JSON(http.StatusInternalServerError, res)
+			return
+		}
+	}
+
+	// assign refresh token to update
+	ticketData.Ticket = ticket
+
+	// update websocket ticket in db
+	if _, err := controller.ticket.UpdateByUser(ticketData); err != nil {
+		res := entities.InterenalServerErrorResponse()
+		ctx.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
 	// return response
-	res := entities.NewAuthenticatedResponse(credential.ID, credential.Email, token, refreshToken)
+	res := entities.NewAuthenticatedResponse(credential.ID, credential.Email, token, refreshToken, ticket)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
