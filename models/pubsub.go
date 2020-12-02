@@ -12,7 +12,7 @@ type pubSub struct {
 }
 
 type PubSubInterface interface {
-	NewClient(id string, conn *websocket.Conn) Client
+	NewClient(id uint64, conn *websocket.Conn) Client
 	NewMessage() *message
 	AddClient(client Client) *pubSub
 	RemoveClient(client Client) *pubSub
@@ -27,7 +27,7 @@ type PubSubImplementation struct {
 }
 
 type Client struct {
-	ID         string
+	ID         uint64
 	Connection *websocket.Conn
 }
 
@@ -38,6 +38,7 @@ type subscription struct {
 
 type message struct {
 	Action string          `json:"action"`
+	Ticket string          `json:"ticket"`
 	Topic  uint64          `json:"topic"`
 	Data   json.RawMessage `json:"data"`
 }
@@ -53,7 +54,7 @@ func NewPubSubModel(ps *pubSub) *PubSubImplementation {
 	return &PubSubImplementation{pubSub: ps}
 }
 
-func (implementation *PubSubImplementation) NewClient(id string, conn *websocket.Conn) Client {
+func (implementation *PubSubImplementation) NewClient(id uint64, conn *websocket.Conn) Client {
 	return Client{
 		ID:         id,
 		Connection: conn,
