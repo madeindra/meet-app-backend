@@ -38,7 +38,6 @@ type subscription struct {
 
 type message struct {
 	Action string          `json:"action"`
-	Ticket string          `json:"ticket"`
 	Topic  uint64          `json:"topic"`
 	Data   json.RawMessage `json:"data"`
 }
