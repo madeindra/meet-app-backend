@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
+	"errors"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/madeindra/meet-app/models"
 )
@@ -21,29 +21,36 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func autoID() string {
-	return uuid.Must(uuid.NewRandom()).String()
-}
-
 type PubSubController struct {
 	pubsub models.PubSubInterface
 	chat   models.ChatsInterface
+	ticket models.TicketInterface
 }
 
-func NewPubSubController(pubsub models.PubSubInterface, chat models.ChatsInterface) *PubSubController {
-	return &PubSubController{pubsub, chat}
+func NewPubSubController(pubsub models.PubSubInterface, chat models.ChatsInterface, ticket models.TicketInterface) *PubSubController {
+	return &PubSubController{pubsub, chat, ticket}
 }
 
 func (controller *PubSubController) WebsocketHandler(ctx *gin.Context) {
+	userID, err := controller.getTicketUser(ctx.Query("ticket"))
+	if err != nil {
+		ctx.Status(http.StatusUnauthorized)
+		return
+	}
+
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		return true
+	}
+
 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
-		log.Println(err)
+		ctx.Status(http.StatusInternalServerError)
 		return
 	}
 	defer conn.Close()
 
 	//TODO: Get ID from context & set as client ID
-	client := controller.pubsub.NewClient(autoID(), conn)
+	client := controller.pubsub.NewClient(userID, conn)
 	controller.pubsub.AddClient(client)
 
 	for {
@@ -97,4 +104,20 @@ func (controller *PubSubController) processMessage(client models.Client, message
 		controller.pubsub.BounceBack(&client, "Server: Action unrecognized")
 		break
 	}
+}
+
+func (controller *PubSubController) getTicketUser(ticket string) (uint64, error) {
+	if ticket == "" {
+		return 0, errors.New("Invalid ticket")
+	}
+
+	data := controller.ticket.New()
+	data.Ticket = ticket
+
+	existing := controller.ticket.FindOne(data)
+	if existing.ID == 0 {
+		return 0, errors.New("Ticket not found")
+	}
+
+	return existing.UserID, nil
 }
