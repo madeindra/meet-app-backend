@@ -26,6 +26,8 @@ const (
 	resetIDPath      string = "/reset/:id"
 	profilePath      string = "/profiles"
 	profileIDPath    string = "/profiles/:id"
+	skillPath        string = "/skills"
+	skillIDPath      string = "/skills/:id"
 	matchPath        string = "/matches"
 	matchIDPath      string = "/matches/:id"
 )
@@ -49,6 +51,7 @@ func RouterInit() *gin.Engine {
 	ticketModel := models.NewTicketModel(db)
 	resetModel := models.NewResetModel(db)
 	profileModel := models.NewProfileModel(db)
+	skillModel := models.NewSkillModel(db)
 	matchModel := models.NewMatchModel(db)
 
 	pingController := controllers.NewPingController()
@@ -57,6 +60,7 @@ func RouterInit() *gin.Engine {
 	resetController := controllers.NewResetController(resetModel, credentialModel, hashHelper, randomHelper)
 	tokenController := controllers.NewTokenController(tokenModel, credentialModel, bearerHelper)
 	profileController := controllers.NewProfileController(profileModel, credentialModel)
+	skillController := controllers.NewSkillController(skillModel, profileModel)
 	matchController := controllers.NewMatchController(matchModel, credentialModel)
 
 	router.GET(rootPath, pingController.Ping)
@@ -81,6 +85,12 @@ func RouterInit() *gin.Engine {
 	v1.DELETE(profileIDPath, profileController.Delete)
 	v1.GET(profilePath, profileController.GetCollections)
 	v1.POST(profilePath, profileController.Post)
+
+	v1.GET(skillIDPath, skillController.GetSingle)
+	v1.PUT(skillIDPath, skillController.Put)
+	v1.DELETE(skillIDPath, skillController.Delete)
+	v1.GET(skillPath, skillController.GetCollections)
+	v1.POST(skillPath, skillController.Post)
 
 	v1.GET(matchIDPath, matchController.GetSingle)
 	v1.PUT(matchIDPath, matchController.Put)
