@@ -27,9 +27,9 @@ func (controller *SkillsController) GetSingle(ctx *gin.Context) {
 		return
 	}
 
-	// find skill by user id
+	// find skill by id
 	data := controller.skill.New()
-	data.UserID = id
+	data.ID = id
 
 	skill := controller.skill.FindOne(data)
 	if skill.ID == 0 {
@@ -39,12 +39,47 @@ func (controller *SkillsController) GetSingle(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewSkillResponse(skill.UserID, skill.SkillName)
+	res := entities.NewSkillResponse(skill.ID, skill.UserID, skill.SkillName)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
 
 func (controller *SkillsController) GetCollections(ctx *gin.Context) {
+	// get skillName from url
+	skillName := ctx.DefaultQuery("skillName", "")
+
+	// get userId from url
+	userID, err := strconv.ParseUint(ctx.DefaultQuery("userId", "0"), 10, 64)
+	if err != nil {
+		res := entities.BadRequestResponse()
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	// find all user's skill or skill name stored in db
+	userSkill := controller.skill.New()
+
+	if skillName != "" {
+		userSkill.SkillName = skillName
+	}
+
+	if userID != 0 {
+		userSkill.UserID = userID
+	}
+
+	if userSkill.SkillName != "" || userSkill.UserID != 0 {
+		skill := controller.skill.FindBy(userSkill)
+		if len(skill) == 0 {
+			res := entities.NotFoundResponse()
+			ctx.JSON(http.StatusNotFound, res)
+			return
+		}
+
+		res := entities.NewSkillBatchResponse(skill)
+		ctx.JSON(http.StatusOK, res)
+		return
+	}
+
 	// find all skill stored in db
 	skill := controller.skill.FindAll()
 	if len(skill) == 0 {
@@ -78,13 +113,17 @@ func (controller *SkillsController) Post(ctx *gin.Context) {
 		return
 	}
 
-	skillExist := controller.skill.New()
-	skillExist.UserID = req.UserID
-
 	// create skill data to insert in db
 	data := controller.skill.New()
 	data.UserID = req.UserID
 	data.SkillName = req.SkillName
+
+	// find duplicate user skill
+	if duplicate := controller.skill.FindOne(data); duplicate.ID != 0 {
+		res := entities.ConflictResponse()
+		ctx.JSON(http.StatusConflict, res)
+		return
+	}
 
 	// insert skill data to db
 	skill, err := controller.skill.Create(data)
@@ -95,7 +134,7 @@ func (controller *SkillsController) Post(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewSkillResponse(skill.UserID, skill.SkillName)
+	res := entities.NewSkillResponse(skill.ID, skill.UserID, skill.SkillName)
 	ctx.JSON(http.StatusCreated, res)
 	return
 }
@@ -109,9 +148,9 @@ func (controller *SkillsController) Put(ctx *gin.Context) {
 		return
 	}
 
-	// find skill by user id in db
+	// find skill by id in db
 	checkExisting := controller.skill.New()
-	checkExisting.UserID = id
+	checkExisting.ID = id
 
 	if exist := controller.skill.FindOne(checkExisting); exist.ID == 0 {
 		res := entities.NotFoundResponse()
@@ -129,11 +168,11 @@ func (controller *SkillsController) Put(ctx *gin.Context) {
 
 	// create skill data to be updated in db
 	data := controller.skill.New()
-	data.UserID = req.UserID
+	data.ID = id
 	data.SkillName = req.SkillName
 
 	// update skill data
-	skill, err := controller.skill.UpdateByUser(data)
+	skill, err := controller.skill.UpdateById(data)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
@@ -141,7 +180,7 @@ func (controller *SkillsController) Put(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewSkillResponse(skill.UserID, skill.SkillName)
+	res := entities.NewSkillResponse(skill.ID, skill.UserID, skill.SkillName)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -157,7 +196,7 @@ func (controller *SkillsController) Delete(ctx *gin.Context) {
 
 	// find skill by used id in db
 	data := controller.skill.New()
-	data.UserID = id
+	data.ID = id
 
 	if skill := controller.skill.FindOne(data); skill.ID == 0 {
 		res := entities.NotFoundResponse()

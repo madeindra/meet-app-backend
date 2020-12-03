@@ -14,7 +14,7 @@ type SkillInterface interface {
 	FindAll() []Skills
 	FindBy(data Skills) []Skills
 	FindOne(data Skills) Skills
-	UpdateByUser(data Skills) (Skills, error)
+	UpdateById(data Skills) (Skills, error)
 	Delete(data Skills) error
 }
 
@@ -64,9 +64,9 @@ func (implementation *SkillImplementation) FindOne(data Skills) Skills {
 	return res
 }
 
-func (implementation *SkillImplementation) UpdateByUser(data Skills) (Skills, error) {
+func (implementation *SkillImplementation) UpdateById(data Skills) (Skills, error) {
 	tx := implementation.db.Begin()
-	res := Skills{UserID: data.UserID}
+	res := Skills{ID: data.ID}
 
 	if err := tx.Model(Skills{}).Where(res).Updates(&data).Error; err != nil {
 		tx.Rollback()
