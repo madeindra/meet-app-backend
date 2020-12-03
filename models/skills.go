@@ -3,9 +3,9 @@ package models
 import "github.com/jinzhu/gorm"
 
 type Skills struct {
-	ID     uint64 `gorm:"primaryKey"`
-	UserID uint64
-	Name   string
+	ID        uint64 `gorm:"primaryKey"`
+	UserID    uint64
+	SkillName string
 }
 
 type SkillInterface interface {

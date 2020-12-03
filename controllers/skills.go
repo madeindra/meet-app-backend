@@ -39,7 +39,7 @@ func (controller *SkillsController) GetSingle(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewSkillResponse(skill.UserID, skill.Name)
+	res := entities.NewSkillResponse(skill.UserID, skill.SkillName)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -91,7 +91,7 @@ func (controller *SkillsController) Post(ctx *gin.Context) {
 	// create skill data to insert in db
 	data := controller.skill.New()
 	data.UserID = req.UserID
-	data.Name = req.Name
+	data.SkillName = req.SkillName
 
 	// insert skill data to db
 	skill, err := controller.skill.Create(data)
@@ -102,7 +102,7 @@ func (controller *SkillsController) Post(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewSkillResponse(skill.UserID, skill.Name)
+	res := entities.NewSkillResponse(skill.UserID, skill.SkillName)
 	ctx.JSON(http.StatusCreated, res)
 	return
 }
@@ -137,7 +137,7 @@ func (controller *SkillsController) Put(ctx *gin.Context) {
 	// create skill data to be updated in db
 	data := controller.skill.New()
 	data.UserID = req.UserID
-	data.Name = req.Name
+	data.SkillName = req.SkillName
 
 	// update skill data
 	skill, err := controller.skill.UpdateByUser(data)
@@ -148,7 +148,7 @@ func (controller *SkillsController) Put(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewSkillResponse(skill.UserID, skill.Name)
+	res := entities.NewSkillResponse(skill.UserID, skill.SkillName)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
