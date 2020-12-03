@@ -81,13 +81,6 @@ func (controller *SkillsController) Post(ctx *gin.Context) {
 	skillExist := controller.skill.New()
 	skillExist.UserID = req.UserID
 
-	// if user already exist, abort process
-	if duplicate := controller.skill.FindOne(skillExist); duplicate.ID != 0 {
-		res := entities.ConflictResponse()
-		ctx.JSON(http.StatusConflict, res)
-		return
-	}
-
 	// create skill data to insert in db
 	data := controller.skill.New()
 	data.UserID = req.UserID
