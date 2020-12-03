@@ -39,7 +39,7 @@ func (controller *MatchController) GetSingle(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewMatchResponse(match.ID, match.UserID, match.UserMatch, match.Liked)
+	res := entities.NewMatchResponse(match.ID, match.UserID, match.UserMatch, match.Matched)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -63,11 +63,11 @@ func (controller *MatchController) GetCollections(ctx *gin.Context) {
 
 	// define variable for boolean sensitive search, without this, it can't filter matched status "false"
 	var boolSensitive bool = false
-	var liked bool = false
+	var matched bool = false
 
-	// if liked query is set, the search is a boolean sensitive search
-	if ctx.Query("liked") != "" {
-		liked, err = strconv.ParseBool(ctx.Query("liked"))
+	// if matched query is set, the search is a boolean sensitive search
+	if ctx.Query("matched") != "" {
+		matched, err = strconv.ParseBool(ctx.Query("matched"))
 		if err != nil {
 			res := entities.BadRequestResponse()
 			ctx.JSON(http.StatusBadRequest, res)
@@ -81,7 +81,7 @@ func (controller *MatchController) GetCollections(ctx *gin.Context) {
 	data := controller.match.New()
 	data.UserID = userID
 	data.UserMatch = userMatch
-	data.Liked = liked
+	data.Matched = matched
 
 	// find match data in db
 	match := controller.match.FindBy(data, boolSensitive)
@@ -145,7 +145,7 @@ func (controller *MatchController) Post(ctx *gin.Context) {
 	data := controller.match.New()
 	data.UserID = req.UserID
 	data.UserMatch = req.UserMatch
-	data.Liked = req.Liked
+	data.Matched = req.Matched
 
 	// insert match data to db
 	match, err := controller.match.Create(data)
@@ -156,7 +156,7 @@ func (controller *MatchController) Post(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewMatchResponse(match.ID, match.UserID, match.UserMatch, match.Liked)
+	res := entities.NewMatchResponse(match.ID, match.UserID, match.UserMatch, match.Matched)
 	ctx.JSON(http.StatusCreated, res)
 	return
 }
@@ -193,7 +193,7 @@ func (controller *MatchController) Put(ctx *gin.Context) {
 	data.ID = id
 	data.UserID = req.UserID
 	data.UserMatch = req.UserMatch
-	data.Liked = req.Liked
+	data.Matched = req.Matched
 
 	// update match data in db
 	match, err := controller.match.UpdateByID(data)
@@ -204,7 +204,7 @@ func (controller *MatchController) Put(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewMatchResponse(match.ID, match.UserID, match.UserMatch, match.Liked)
+	res := entities.NewMatchResponse(match.ID, match.UserID, match.UserMatch, match.Matched)
 	ctx.JSON(http.StatusOK, res)
 	return
 }

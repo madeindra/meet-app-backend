@@ -6,7 +6,7 @@ type Matches struct {
 	ID        uint64 `gorm:"primaryKey"`
 	UserID    uint64
 	UserMatch uint64
-	Liked     bool
+	Matched   bool
 }
 
 type MatchInterface interface {
@@ -45,7 +45,7 @@ func (implementation *MatchImplementation) FindBy(data Matches, boolSensitive bo
 	res := []Matches{}
 
 	if boolSensitive {
-		implementation.db.Where(data).Where(map[string]interface{}{"liked": data.Liked}).Find(&res)
+		implementation.db.Where(data).Where(map[string]interface{}{"matched": data.Matched}).Find(&res)
 		return res
 	}
 
@@ -64,7 +64,7 @@ func (implementation *MatchImplementation) UpdateByID(data Matches) (Matches, er
 	tx := implementation.db.Begin()
 	res := Matches{ID: data.ID}
 
-	if err := tx.Model(Matches{}).Where(res).Updates(map[string]interface{}{"liked": data.Liked}).Error; err != nil {
+	if err := tx.Model(Matches{}).Where(res).Updates(map[string]interface{}{"matched": data.Matched}).Error; err != nil {
 		tx.Rollback()
 		return Matches{}, err
 	}
