@@ -1,27 +1,22 @@
 package common
 
 import (
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 var db *gorm.DB
 
 func DBInit() {
-	provider := GetDatabaseProvider()
 	host := GetDatabaseHost()
 
-	conn, err := gorm.Open(provider, host)
+	conn, err := gorm.Open(sqlite.Open(host), &gorm.Config{})
 
 	if err != nil {
 		panic("Failed while connecting to database")
 	}
 
 	db = conn
-}
-
-func DBClose() {
-	db.Close()
 }
 
 func GetDB() *gorm.DB {

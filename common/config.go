@@ -18,10 +18,6 @@ func GetServerPort() string {
 	return viper.GetString("server.port")
 }
 
-func GetDatabaseProvider() string {
-	return viper.GetString("database.provider")
-}
-
 func GetDatabaseHost() string {
 	return viper.GetString("database.host")
 }

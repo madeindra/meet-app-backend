@@ -3,8 +3,7 @@
         "port": 8080
     },
     "database": {
-        "provider": "sqlite3",
-        "host": ":memory:"
+        "host": "data.db"
     },
     "basic": {
         "username": "foo",

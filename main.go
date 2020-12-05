@@ -9,7 +9,6 @@ import (
 func main() {
 	common.ConfigInit()
 	common.DBInit()
-	defer common.DBClose()
 
 	models.Migrate()
 

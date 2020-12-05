@@ -1,6 +1,6 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import "gorm.io/gorm"
 
 type Matches struct {
 	ID        uint64 `gorm:"primaryKey"`
