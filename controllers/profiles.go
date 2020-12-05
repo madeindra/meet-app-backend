@@ -39,7 +39,7 @@ func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewProfileResponse(profile.ID, profile.FirstName, profile.LastName, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.ID, profile.Name, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -91,8 +91,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 	// create profile data to insert in db
 	data := controller.profile.New()
 	data.ID = req.ID
-	data.FirstName = req.FirstName
-	data.LastName = req.LastName
+	data.Name = req.Name
 	data.Description = req.Description
 	data.Gender = req.Gender
 	data.Latitude = req.Latitude
@@ -107,7 +106,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewProfileResponse(profile.ID, profile.FirstName, profile.LastName, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.ID, profile.Name, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusCreated, res)
 	return
 }
@@ -142,8 +141,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 	// create profile data to be updated in db
 	data := controller.profile.New()
 	data.ID = req.ID
-	data.FirstName = req.FirstName
-	data.LastName = req.LastName
+	data.Name = req.Name
 	data.Description = req.Description
 	data.Gender = req.Gender
 	data.Latitude = req.Latitude
@@ -158,7 +156,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewProfileResponse(profile.ID, profile.FirstName, profile.LastName, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.ID, profile.Name, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusOK, res)
 	return
 }

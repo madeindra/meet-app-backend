@@ -7,8 +7,7 @@ import (
 type Profiles struct {
 	ID           uint64 `gorm:"primaryKey"`
 	CredentialID uint64 `gorm:"unique"`
-	FirstName    string
-	LastName     string
+	Name         string
 	Description  string
 	Gender       string
 	Latitude     float64
