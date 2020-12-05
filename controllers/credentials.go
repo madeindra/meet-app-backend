@@ -66,7 +66,7 @@ func (controller *CredentialController) Register(ctx *gin.Context) {
 
 	// create profile data for that credential
 	userProfile := controller.profile.New()
-	userProfile.UserID = credential.ID
+	userProfile.CredentialID = credential.ID
 
 	// insert profile data to db
 	_, err = controller.profile.Create(userProfile)

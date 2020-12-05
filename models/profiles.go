@@ -5,14 +5,14 @@ import (
 )
 
 type Profiles struct {
-	ID          uint64 `gorm:"primaryKey"`
-	UserID      uint64 `gorm:"unique"`
-	FirstName   string
-	LastName    string
-	Description string
-	Gender      string
-	Latitude    float64
-	Longitude   float64
+	ID           uint64 `gorm:"primaryKey"`
+	CredentialID uint64 `gorm:"unique"`
+	FirstName    string
+	LastName     string
+	Description  string
+	Gender       string
+	Latitude     float64
+	Longitude    float64
 }
 
 type ProfilesInterface interface {
@@ -20,7 +20,7 @@ type ProfilesInterface interface {
 	Create(data Profiles) (Profiles, error)
 	FindAll() []Profiles
 	FindOne(data Profiles) Profiles
-	UpdateByUser(data Profiles) (Profiles, error)
+	UpdateByID(data Profiles) (Profiles, error)
 	Delete(data Profiles) error
 }
 
@@ -63,9 +63,9 @@ func (implementation *ProfilesImplementation) FindOne(data Profiles) Profiles {
 	return res
 }
 
-func (implementation *ProfilesImplementation) UpdateByUser(data Profiles) (Profiles, error) {
+func (implementation *ProfilesImplementation) UpdateByID(data Profiles) (Profiles, error) {
 	tx := implementation.db.Begin()
-	res := Profiles{UserID: data.UserID}
+	res := Profiles{ID: data.ID}
 
 	if err := tx.Model(Profiles{}).Where(res).Updates(&data).Error; err != nil {
 		tx.Rollback()

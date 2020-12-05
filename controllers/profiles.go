@@ -29,7 +29,7 @@ func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 
 	// find profile by user id
 	data := controller.profile.New()
-	data.UserID = id
+	data.ID = id
 
 	profile := controller.profile.FindOne(data)
 	if profile.ID == 0 {
@@ -39,7 +39,7 @@ func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.ID, profile.FirstName, profile.LastName, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -70,7 +70,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 
 	// find credential by user id in db
 	userExist := controller.credential.New()
-	userExist.ID = req.UserID
+	userExist.ID = req.ID
 
 	if exist := controller.credential.FindOne(userExist); exist.ID == 0 {
 		res := entities.NotFoundResponse()
@@ -79,7 +79,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 	}
 
 	profileExist := controller.profile.New()
-	profileExist.UserID = req.UserID
+	profileExist.ID = req.ID
 
 	// if user already exist, abort process
 	if duplicate := controller.profile.FindOne(profileExist); duplicate.ID != 0 {
@@ -90,7 +90,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 
 	// create profile data to insert in db
 	data := controller.profile.New()
-	data.UserID = req.UserID
+	data.ID = req.ID
 	data.FirstName = req.FirstName
 	data.LastName = req.LastName
 	data.Description = req.Description
@@ -107,7 +107,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.ID, profile.FirstName, profile.LastName, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusCreated, res)
 	return
 }
@@ -123,7 +123,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 
 	// find profile by user id in db
 	checkExisting := controller.profile.New()
-	checkExisting.UserID = id
+	checkExisting.ID = id
 
 	if exist := controller.profile.FindOne(checkExisting); exist.ID == 0 {
 		res := entities.NotFoundResponse()
@@ -141,7 +141,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 
 	// create profile data to be updated in db
 	data := controller.profile.New()
-	data.UserID = req.UserID
+	data.ID = req.ID
 	data.FirstName = req.FirstName
 	data.LastName = req.LastName
 	data.Description = req.Description
@@ -150,7 +150,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 	data.Longitude = req.Longitude
 
 	// update profile data
-	profile, err := controller.profile.UpdateByUser(data)
+	profile, err := controller.profile.UpdateByID(data)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
@@ -158,7 +158,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewProfileResponse(profile.UserID, profile.FirstName, profile.LastName, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.ID, profile.FirstName, profile.LastName, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -174,7 +174,7 @@ func (controller *ProfilesController) Delete(ctx *gin.Context) {
 
 	// find profile by used id in db
 	data := controller.profile.New()
-	data.UserID = id
+	data.ID = id
 
 	if profile := controller.profile.FindOne(data); profile.ID == 0 {
 		res := entities.NotFoundResponse()

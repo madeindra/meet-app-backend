@@ -105,7 +105,7 @@ func (controller *SkillsController) Post(ctx *gin.Context) {
 
 	// find credential by user id in db
 	userExist := controller.profile.New()
-	userExist.UserID = req.UserID
+	userExist.ID = req.UserID
 
 	if exist := controller.profile.FindOne(userExist); exist.ID == 0 {
 		res := entities.NotFoundResponse()
