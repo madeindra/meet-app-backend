@@ -12,10 +12,11 @@ import (
 type ProfilesController struct {
 	profile    models.ProfilesInterface
 	credential models.CredentialInterface
+	skill      models.SkillInterface
 }
 
-func NewProfileController(profile models.ProfilesInterface, credential models.CredentialInterface) *ProfilesController {
-	return &ProfilesController{profile, credential}
+func NewProfileController(profile models.ProfilesInterface, credential models.CredentialInterface, skill models.SkillInterface) *ProfilesController {
+	return &ProfilesController{profile, credential, skill}
 }
 
 func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
@@ -45,6 +46,55 @@ func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 }
 
 func (controller *ProfilesController) GetCollections(ctx *gin.Context) {
+	// get skillName from url
+	skillName := ctx.DefaultQuery("skillName", "")
+	userName := ctx.DefaultQuery("userName", "")
+
+	var skillList []uint64
+
+	if skillName != "" {
+		// find all skill name stored in db
+		userSkill := controller.skill.New()
+		userSkill.SkillName = skillName
+
+		skills := controller.skill.FindBy(userSkill)
+		for i := range skills {
+			skillList = append(skillList, skills[i].UserID)
+		}
+	}
+
+	if userName != "" {
+		// find all user name stored in db
+		user := controller.profile.New()
+		user.Name = userName
+
+		users := controller.profile.FindBy(user)
+		if len(users) == 0 {
+			res := entities.NotFoundResponse()
+			ctx.JSON(http.StatusNotFound, res)
+			return
+		}
+
+		// return response
+		res := entities.NewProfileBatchResponse(users)
+		ctx.JSON(http.StatusOK, res)
+		return
+	}
+
+	if len(skillList) > 0 {
+		profile := controller.profile.FindIn(skillList)
+		if len(profile) == 0 {
+			res := entities.NotFoundResponse()
+			ctx.JSON(http.StatusNotFound, res)
+			return
+		}
+
+		// return response
+		res := entities.NewProfileBatchResponse(profile)
+		ctx.JSON(http.StatusOK, res)
+		return
+	}
+
 	// find all profile stored in db
 	profile := controller.profile.FindAll()
 	if len(profile) == 0 {
@@ -140,7 +190,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 
 	// create profile data to be updated in db
 	data := controller.profile.New()
-	data.ID = req.ID
+	data.ID = id
 	data.Name = req.Name
 	data.Description = req.Description
 	data.Gender = req.Gender

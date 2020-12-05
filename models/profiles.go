@@ -23,6 +23,8 @@ type ProfilesInterface interface {
 	New() Profiles
 	Create(data Profiles) (Profiles, error)
 	FindAll() []Profiles
+	FindIn(filter []uint64) []Profiles
+	FindBy(data Profiles) []Profiles
 	FindOne(data Profiles) Profiles
 	UpdateByID(data Profiles) (Profiles, error)
 	Delete(data Profiles) error
@@ -56,6 +58,20 @@ func (implementation *ProfilesImplementation) FindAll() []Profiles {
 
 	implementation.db.Find(&res)
 
+	return res
+}
+
+func (implementation *ProfilesImplementation) FindIn(filter []uint64) []Profiles {
+	res := []Profiles{}
+
+	implementation.db.Find(&res, filter)
+	return res
+}
+
+func (implementation *ProfilesImplementation) FindBy(data Profiles) []Profiles {
+	res := []Profiles{}
+
+	implementation.db.Where(data).Find(&res)
 	return res
 }
 
