@@ -13,6 +13,11 @@ type Profiles struct {
 	Gender       string
 	Latitude     float64
 	Longitude    float64
+	Credential   credentials `gorm:"foreignKey:CredentialID"`
+	Skills       []Skills    `gorm:"foreignKey:UserID"`
+	Matches      []Matches   `gorm:"foreignKey:UserID"`
+	Ticket       tickets     `gorm:"foreignKey:UserID"`
+	Token        tokens      `gorm:"foreignKey:UserID"`
 }
 
 type ProfilesInterface interface {
