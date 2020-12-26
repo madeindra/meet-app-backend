@@ -17,6 +17,7 @@ const (
 	v1Path   string = "/api/v1"
 
 	chatPath         string = "/chat"
+	chatDetailPath   string = "/chat/details/:id"
 	authenticatePath string = "/authentication"
 	registerPath     string = "/registration"
 	credentialIDPath string = "/credential/:id"
@@ -56,6 +57,7 @@ func RouterInit() *gin.Engine {
 
 	pingController := controllers.NewPingController()
 	pubSubController := controllers.NewPubSubController(pubSubModel, chatModel, ticketModel, credentialModel)
+	chatController := controllers.NewChatController(chatModel, credentialModel)
 	credentialController := controllers.NewCredentialController(credentialModel, tokenModel, ticketModel, profileModel, hashHelper, bearerHelper, randomHelper)
 	resetController := controllers.NewResetController(resetModel, credentialModel, hashHelper, randomHelper)
 	tokenController := controllers.NewTokenController(tokenModel, credentialModel, bearerHelper)
@@ -78,6 +80,8 @@ func RouterInit() *gin.Engine {
 	auth.PUT(resetIDPath, resetController.Complete)
 
 	v1.Use(middlewares.Jwt())
+
+	v1.GET(chatDetailPath, chatController.GetDetail)
 
 	v1.PUT(credentialIDPath, credentialController.Update)
 	v1.GET(profileIDPath, profileController.GetSingle)
