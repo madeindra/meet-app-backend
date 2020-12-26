@@ -14,8 +14,7 @@ type Chats struct {
 type ChatsInterface interface {
 	New() Chats
 	Create(data Chats) (Chats, error)
-	FindAll() []Chats
-	FindOne(data Chats) Chats
+	FindBy(data Chats) []Chats
 	Delete(data Chats) error
 }
 
@@ -42,19 +41,10 @@ func (implementation *ChatsImplementation) Create(data Chats) (Chats, error) {
 	return data, tx.Commit().Error
 }
 
-func (implementation *ChatsImplementation) FindAll() []Chats {
+func (implementation *ChatsImplementation) FindBy(data Chats) []Chats {
 	res := []Chats{}
 
-	implementation.db.Find(&res)
-
-	return res
-}
-
-func (implementation *ChatsImplementation) FindOne(data Chats) Chats {
-	res := Chats{}
-
-	implementation.db.Where(data).First(&res)
-
+	implementation.db.Where(data).Find(&res)
 	return res
 }
 
