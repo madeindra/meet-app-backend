@@ -15,6 +15,7 @@ type ChatsInterface interface {
 	New() Chats
 	Create(data Chats) (Chats, error)
 	FindBy(data Chats) []Chats
+	FindDistinct(data Chats) []Chats
 	Delete(data Chats) error
 }
 
@@ -45,6 +46,15 @@ func (implementation *ChatsImplementation) FindBy(data Chats) []Chats {
 	res := []Chats{}
 
 	implementation.db.Where(data).Find(&res)
+	return res
+}
+
+func (implementation *ChatsImplementation) FindDistinct(data Chats) []Chats {
+	res := []Chats{}
+
+	sub := implementation.db.Model(&Chats{}).Order("id desc").Where(data)
+	implementation.db.Table("(?)", sub).Group("target").Order("id desc").Find((&res))
+
 	return res
 }
 
