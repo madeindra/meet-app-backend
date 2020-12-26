@@ -17,7 +17,8 @@ const (
 	v1Path   string = "/api/v1"
 
 	chatPath         string = "/chat"
-	chatDetailPath   string = "/chat/details/:id"
+	chatDetailPath   string = "/chat/details"
+	chatDetailIDPath string = "/chat/details/:id"
 	authenticatePath string = "/authentication"
 	registerPath     string = "/registration"
 	credentialIDPath string = "/credential/:id"
@@ -81,7 +82,8 @@ func RouterInit() *gin.Engine {
 
 	v1.Use(middlewares.Jwt())
 
-	v1.GET(chatDetailPath, chatController.GetDetail)
+	v1.GET(chatDetailIDPath, chatController.GetDetail)
+	v1.GET(chatDetailPath, chatController.GetLatest)
 
 	v1.PUT(credentialIDPath, credentialController.Update)
 	v1.GET(profileIDPath, profileController.GetSingle)
