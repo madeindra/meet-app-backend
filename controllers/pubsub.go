@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/madeindra/meet-app/entities"
 	"github.com/madeindra/meet-app/models"
 )
 
@@ -77,26 +78,28 @@ func (controller *PubSubController) processMessage(client models.Client, message
 			break
 		}
 
-		ch.Sender = client.ID
-		if ch.Target == 0 || ch.Content == "" {
+		ch.SenderID = client.ID
+		if ch.TargetID == 0 || ch.Content == "" {
 			controller.pubsub.BounceBack(&client, "Server: Message is not in a proper format")
 			break
 		}
 
 		user := controller.credential.New()
-		user.ID = ch.Target
+		user.ID = ch.TargetID
 		if existing := controller.credential.FindOne(user); existing.Email == "" {
 			controller.pubsub.BounceBack(&client, "Server: Target does not exist")
 			break
 		}
 
-		content, err := json.Marshal(&ch)
+		chat := entities.NewChatResponse(ch.ID, ch.SenderID, ch.TargetID, ch.Content)
+
+		res, err := json.Marshal(&chat)
 		if err != nil {
 			controller.pubsub.BounceBack(&client, "Server: Failed creating raw message")
 			break
 		}
 
-		go controller.pubsub.Publish(ch.Target, content, nil)
+		go controller.pubsub.Publish(ch.TargetID, res, nil)
 		go controller.chat.Create(ch)
 		break
 

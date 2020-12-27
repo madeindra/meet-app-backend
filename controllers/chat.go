@@ -49,10 +49,10 @@ func (controller *ChatController) GetDetail(ctx *gin.Context) {
 
 	// find chat where above user is the sender
 	chat := controller.chat.New()
-	chat.Sender = user.ID
+	chat.SenderID = user.ID
 
 	// also find where id in param is the target
-	chat.Target = id
+	chat.TargetID = id
 	details := controller.chat.FindBy(chat)
 
 	// return without checking data length
@@ -83,7 +83,7 @@ func (controller *ChatController) GetLatest(ctx *gin.Context) {
 
 	// find latest chat where above user is the sender
 	chat := controller.chat.New()
-	chat.Sender = user.ID
+	chat.SenderID = user.ID
 
 	details := controller.chat.FindDistinct(chat)
 

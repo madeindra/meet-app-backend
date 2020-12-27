@@ -5,10 +5,10 @@ import (
 )
 
 type Chats struct {
-	ID      uint64 `gorm:"primaryKey" json:",omitempty"`
-	Sender  uint64
-	Target  uint64
-	Content string
+	ID       uint64 `gorm:"primaryKey" json:",omitempty"`
+	SenderID uint64
+	TargetID uint64
+	Content  string
 }
 
 type ChatsInterface interface {
@@ -53,7 +53,7 @@ func (implementation *ChatsImplementation) FindDistinct(data Chats) []Chats {
 	res := []Chats{}
 
 	sub := implementation.db.Model(&Chats{}).Order("id desc").Where(data)
-	implementation.db.Table("(?)", sub).Group("target").Order("id desc").Find((&res))
+	implementation.db.Table("(?)", sub).Group("target_id").Order("id desc").Find((&res))
 
 	return res
 }
