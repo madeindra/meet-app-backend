@@ -96,7 +96,7 @@ func (controller *SkillsController) GetCollections(ctx *gin.Context) {
 
 func (controller *SkillsController) Post(ctx *gin.Context) {
 	// bind request
-	req := entities.NewSkillRequest()
+	req := entities.NewSkillBatchRequest()
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := entities.BadRequestResponse()
 		ctx.JSON(http.StatusBadRequest, res)
@@ -113,20 +113,30 @@ func (controller *SkillsController) Post(ctx *gin.Context) {
 		return
 	}
 
-	// create skill data to insert in db
-	data := controller.skill.New()
-	data.UserID = req.UserID
-	data.SkillName = req.SkillName
+	// create batch skill data to insert in db
+	bulkData := controller.skill.NewBulk()
 
-	// find duplicate user skill
-	if duplicate := controller.skill.FindOne(data); duplicate.ID != 0 {
+	for _, v := range req.SkillName {
+		data := controller.skill.New()
+		data.UserID = req.UserID
+		data.SkillName = v
+
+		// find duplicate user skill
+		if duplicate := controller.skill.FindOne(data); duplicate.ID != 0 {
+			continue
+		}
+
+		bulkData = append(bulkData, data)
+	}
+
+	if len(bulkData) == 0 {
 		res := entities.ConflictResponse()
 		ctx.JSON(http.StatusConflict, res)
 		return
 	}
 
-	// insert skill data to db
-	skill, err := controller.skill.Create(data)
+	// insert bulk skills data to db
+	skills, err := controller.skill.Create(bulkData)
 	if err != nil {
 		res := entities.InterenalServerErrorResponse()
 		ctx.JSON(http.StatusInternalServerError, res)
@@ -134,7 +144,7 @@ func (controller *SkillsController) Post(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewSkillResponse(skill.ID, skill.UserID, skill.SkillName)
+	res := entities.NewSkillBatchResponse(skills)
 	ctx.JSON(http.StatusCreated, res)
 	return
 }

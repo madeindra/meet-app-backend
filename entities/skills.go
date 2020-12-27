@@ -2,6 +2,11 @@ package entities
 
 import "github.com/madeindra/meet-app/models"
 
+type skillBatchRequest struct {
+	UserID    uint64   `json:"userId"`
+	SkillName []string `json:"skillName"`
+}
+
 type skillRequest struct {
 	UserID    uint64 `json:"userId"`
 	SkillName string `json:"skillName"`
@@ -27,6 +32,10 @@ type skillResponseData struct {
 
 func NewSkillRequest() skillRequest {
 	return skillRequest{}
+}
+
+func NewSkillBatchRequest() skillBatchRequest {
+	return skillBatchRequest{}
 }
 
 func NewSkillResponse(id uint64, userId uint64, skillName string) skillResponse {

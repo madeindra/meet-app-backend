@@ -10,7 +10,8 @@ type Skills struct {
 
 type SkillInterface interface {
 	New() Skills
-	Create(data Skills) (Skills, error)
+	NewBulk() []Skills
+	Create(data []Skills) ([]Skills, error)
 	FindAll() []Skills
 	FindBy(data Skills) []Skills
 	FindOne(data Skills) Skills
@@ -30,12 +31,16 @@ func (implementation *SkillImplementation) New() Skills {
 	return Skills{}
 }
 
-func (implementation *SkillImplementation) Create(data Skills) (Skills, error) {
+func (implementation *SkillImplementation) NewBulk() []Skills {
+	return []Skills{}
+}
+
+func (implementation *SkillImplementation) Create(data []Skills) ([]Skills, error) {
 	tx := implementation.db.Begin()
 
 	if err := tx.Create(&data).Error; err != nil {
 		tx.Rollback()
-		return Skills{}, err
+		return []Skills{}, err
 	}
 
 	return data, tx.Commit().Error
