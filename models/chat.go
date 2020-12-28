@@ -45,7 +45,7 @@ func (implementation *ChatsImplementation) Create(data Chats) (Chats, error) {
 func (implementation *ChatsImplementation) FindBy(data Chats) []Chats {
 	res := []Chats{}
 
-	implementation.db.Where(data).Find(&res)
+	implementation.db.Raw("SELECT * FROM chats WHERE sender_id = ? AND target_id = ? UNION SELECT * FROM chats WHERE target_id = ? AND sender_id = ?", data.SenderID, data.TargetID, data.SenderID, data.TargetID).Scan(&res)
 	return res
 }
 
