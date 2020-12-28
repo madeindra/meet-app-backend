@@ -21,11 +21,13 @@ type Profiles struct {
 
 type ProfilesInterface interface {
 	New() Profiles
+	NewBatch() []Profiles
 	Create(data Profiles) (Profiles, error)
 	FindAll() []Profiles
 	FindIn(filter []uint64) []Profiles
 	FindBy(data Profiles) []Profiles
 	FindOne(data Profiles) Profiles
+	FindLike(data Profiles) []Profiles
 	UpdateByID(data Profiles) (Profiles, error)
 	Delete(data Profiles) error
 }
@@ -40,6 +42,9 @@ func NewProfileModel(db *gorm.DB) *ProfilesImplementation {
 
 func (implementation *ProfilesImplementation) New() Profiles {
 	return Profiles{}
+}
+func (implementation *ProfilesImplementation) NewBatch() []Profiles {
+	return []Profiles{}
 }
 
 func (implementation *ProfilesImplementation) Create(data Profiles) (Profiles, error) {
@@ -79,6 +84,14 @@ func (implementation *ProfilesImplementation) FindOne(data Profiles) Profiles {
 	res := Profiles{}
 
 	implementation.db.Where(data).First(&res)
+
+	return res
+}
+
+func (implementation *ProfilesImplementation) FindLike(data Profiles) []Profiles {
+	res := []Profiles{}
+
+	implementation.db.Preload("Credential").Where("name LIKE ?", "%"+data.Name+"%").Find(&res)
 
 	return res
 }
