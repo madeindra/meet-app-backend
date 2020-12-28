@@ -32,6 +32,7 @@ const (
 	skillIDPath      string = "/skills/:id"
 	matchPath        string = "/matches"
 	matchIDPath      string = "/matches/:id"
+	userPath         string = "/users"
 )
 
 func RouterInit() *gin.Engine {
@@ -65,6 +66,7 @@ func RouterInit() *gin.Engine {
 	profileController := controllers.NewProfileController(profileModel, credentialModel, skillModel)
 	skillController := controllers.NewSkillController(skillModel, profileModel)
 	matchController := controllers.NewMatchController(matchModel, credentialModel)
+	userController := controllers.NewUserController(profileModel)
 
 	router.GET(rootPath, pingController.Ping)
 	router.GET(chatPath, pubSubController.WebsocketHandler)
@@ -103,5 +105,8 @@ func RouterInit() *gin.Engine {
 	v1.DELETE(matchIDPath, matchController.Delete)
 	v1.GET(matchPath, matchController.GetCollections)
 	v1.POST(matchPath, matchController.Post)
+
+	v1.GET(userPath, userController.FindUser)
+
 	return router
 }
