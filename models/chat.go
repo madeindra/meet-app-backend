@@ -52,8 +52,7 @@ func (implementation *ChatsImplementation) FindBy(data Chats) []Chats {
 func (implementation *ChatsImplementation) FindDistinct(data Chats) []Chats {
 	res := []Chats{}
 
-	sub := implementation.db.Model(&Chats{}).Order("id desc").Where(data)
-	implementation.db.Table("(?)", sub).Group("target_id").Order("id desc").Find((&res))
+	implementation.db.Raw("SELECT t1.* FROM chats AS t1 INNER JOIN (SELECT MIN(sender_id, target_id) AS sender_id, MAX(sender_id, target_id) AS target_id, MAX(id) AS max_id FROM chats GROUP BY MIN(sender_id, target_id), MAX(sender_id, target_id)) AS t2 ON MIN(t1.sender_id, t1.target_id) = t2.sender_id AND MAX(t1.sender_id, t1.target_id) = t2.target_id AND t1.id = t2.max_id WHERE t1.sender_id = ? OR t1.target_id = ?", data.SenderID, data.SenderID).Scan(&res)
 
 	return res
 }
