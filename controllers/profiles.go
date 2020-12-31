@@ -40,7 +40,7 @@ func (controller *ProfilesController) GetSingle(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewProfileResponse(profile.ID, profile.Name, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.ID, profile.Name, profile.Description, profile.Gender, profile.Picture, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusOK, res)
 	return
 }
@@ -144,6 +144,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 	data.Name = req.Name
 	data.Description = req.Description
 	data.Gender = req.Gender
+	data.Picture = req.Picture
 	data.Latitude = req.Latitude
 	data.Longitude = req.Longitude
 
@@ -156,7 +157,7 @@ func (controller *ProfilesController) Post(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewProfileResponse(profile.ID, profile.Name, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.ID, profile.Name, profile.Description, profile.Gender, profile.Picture, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusCreated, res)
 	return
 }
@@ -194,6 +195,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 	data.Name = req.Name
 	data.Description = req.Description
 	data.Gender = req.Gender
+	data.Picture = req.Picture
 	data.Latitude = req.Latitude
 	data.Longitude = req.Longitude
 
@@ -206,7 +208,7 @@ func (controller *ProfilesController) Put(ctx *gin.Context) {
 	}
 
 	// return response
-	res := entities.NewProfileResponse(profile.ID, profile.Name, profile.Description, profile.Gender, profile.Latitude, profile.Longitude)
+	res := entities.NewProfileResponse(profile.ID, profile.Name, profile.Description, profile.Gender, profile.Picture, profile.Latitude, profile.Longitude)
 	ctx.JSON(http.StatusOK, res)
 	return
 }

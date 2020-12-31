@@ -10,6 +10,7 @@ type Profiles struct {
 	Name         string
 	Description  string
 	Gender       string
+	Picture      string
 	Latitude     float64
 	Longitude    float64
 	Credential   credentials `gorm:"foreignKey:CredentialID"`

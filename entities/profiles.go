@@ -7,6 +7,7 @@ type profileRequest struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Gender      string  `json:"gender"`
+	Picture     string  `json:"picture"`
 	Latitude    float64 `json:"latitude"`
 	Longitude   float64 `json:"longitude"`
 }
@@ -28,6 +29,7 @@ type profileResponseData struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Gender      string  `json:"gender"`
+	Picture     string  `json:"picture"`
 	Latitude    float64 `json:"latitude"`
 	Longitude   float64 `json:"longitude"`
 }
@@ -36,15 +38,15 @@ func NewProfileRequest() profileRequest {
 	return profileRequest{}
 }
 
-func NewProfileResponse(id uint64, name string, description string, gender string, latitude float64, longitude float64) profileResponse {
-	data := profileResponseData{ID: id, Name: name, Description: description, Gender: gender, Latitude: latitude, Longitude: longitude}
+func NewProfileResponse(id uint64, name string, description string, gender string, picture string, latitude float64, longitude float64) profileResponse {
+	data := profileResponseData{ID: id, Name: name, Description: description, Gender: gender, Picture: picture, Latitude: latitude, Longitude: longitude}
 	return profileResponse{Status: true, Message: operationSuccessMessage, Data: data}
 }
 
 func NewProfileBatchResponse(profiles []models.Profiles) profileBatchResponse {
 	data := []profileResponseData{}
 	for i := range profiles {
-		data = append(data, profileResponseData{ID: profiles[i].ID, Name: profiles[i].Name, Description: profiles[i].Description, Gender: profiles[i].Gender, Latitude: profiles[i].Latitude, Longitude: profiles[i].Longitude})
+		data = append(data, profileResponseData{ID: profiles[i].ID, Name: profiles[i].Name, Description: profiles[i].Description, Gender: profiles[i].Gender, Picture: profiles[i].Picture, Latitude: profiles[i].Latitude, Longitude: profiles[i].Longitude})
 	}
 	return profileBatchResponse{Status: true, Message: operationSuccessMessage, Data: data}
 }
